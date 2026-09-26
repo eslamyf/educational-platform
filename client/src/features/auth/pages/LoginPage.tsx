@@ -71,7 +71,7 @@ export const LoginPage: React.FC = () => {
     if (key === 'password' && value.length < 6) {
       return 'كلمة المرور يجب أن تكون ٦ أحرف على الأقل.';
     }
-    if (key === 'phone' && value && !/^01\d{9}$/.test(value.replace(/\s/g, ''))) {
+    if (key === 'phone' && !/^01\d{9}$/.test(value.replace(/\s/g, ''))) {
       return 'رقم الهاتف يجب أن يتكون من ١١ رقمًا ويبدأ بـ01.';
     }
     if (key === 'nationalId' && value && !/^\d{14}$/.test(value.replace(/\s/g, ''))) {
@@ -102,11 +102,13 @@ export const LoginPage: React.FC = () => {
       const nameErr = validateField('name', profile.name);
       const emailErr = validateField('email', profile.email);
       const passErr = validateField('password', password);
+      const phoneErr = validateField('phone', profile.phone || '');
       if (nameErr) nextErrors.name = nameErr;
       if (emailErr) nextErrors.email = emailErr;
       if (passErr) nextErrors.password = passErr;
+      if (phoneErr) nextErrors.phone = phoneErr;
       setErrors(nextErrors);
-      return !nameErr && !emailErr && !passErr;
+      return !nameErr && !emailErr && !passErr && !phoneErr;
     }
 
     return true;
@@ -345,6 +347,10 @@ export const LoginPage: React.FC = () => {
                         <label>
                           رقم الهاتف
                           <input
+                            type="tel"
+                            inputMode="numeric"
+                            autoComplete="tel"
+                            required
                             value={profile.phone || ''}
                             onChange={(e) => updateProfileField('phone', e.target.value)}
                             placeholder="01X XXX XXXX"

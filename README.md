@@ -62,8 +62,7 @@
 - **لوحة طالب قابلة للتوسّع:** تعرض الكورسات المشترَك بها، نسبة الإنجاز، الدرس القادم، الإيقاع الأسبوعي، وآخر مشاهدة.
 - **اكتشاف أدق:** فلاتر متقدمة حسب المستوى، الحد الأقصى للسعر، الحد الأدنى للتقييم، وترتيب النتائج مع بحث نصي وفلاتر التصنيف.
 - **قياس الفهم:** Quiz قصير في نهاية المنهج يوضح الإجابة الصحيحة والخاطئة ويسمح بإعادة المحاولة.
-- **تجربة مشاهدة داخلية:** Player للمحاضرة، ملفات قابلة للتحميل، Quiz للمحاضرة، قائمة وحدات ومحاضرات، تمييز الدرس الحالي والمكتمل، وانتقال بين الدروس دون مغادرة المنصة.
-- **ملاحظات بزمن الفيديو:** يكتب الطالب ملاحظة أثناء المحاضرة، تُحفظ محليًا مع التوقيت الحالي، ويمكنه طلب الرجوع إلى نفس الدقيقة لاحقًا.
+- **تجربة مشاهدة داخلية:** Player للمحاضرة، ملفات مرفقة تجريبية، Quiz للمحاضرة، وقائمة منهج قابلة للطي؛ يتطلب فتح الدرس التالي إتمام مشاهدة الدرس والإجابة الصحيحة عن مهمته عند وجودها.
 - **حراسة التسجيل:** يمكن تصفح قائمة الكورسات، لكن تفاصيل الكورس والسلة وCheckout وLearning Player تعرض بوابة تسجيل قبل المتابعة. هذا Prototype بصري وليس نظام صلاحيات حقيقي.
 - **Thank You motion:** بعد تأكيد الدفع الوهمي تظهر حالة نجاح متحركة مع زر مباشر إلى المسار التعليمي.
 - **لوحة مدرس واحد:** إدارة الوحدات والمحاضرات وروابط الفيديو والملفات والاختبارات، مع متابعة تقدّم الطلاب. التعديلات التجريبية تحفظ في `localStorage` وتظهر مباشرة في تجربة الطالب.
@@ -117,20 +116,43 @@
 client/
   index.html
   src/
-    App.tsx                 # routing والـ ThemeProvider
-    index.css               # tokens، RTL، responsive، animations
-    lib/
-      data.ts               # Mock data، copy، constants
-    pages/
-      Platform.tsx          # صفحات المنصة العامة والمكونات القابلة لإعادة الاستخدام
-      Portal.tsx            # Login، لوحة الطالب، تجربة مشاهدة الكورس، لوحة المدرس
-    components/             # shadcn/ui وErrorBoundary من الـ scaffold
+    main.tsx                # browser bootstrap
+    app/
+      App.tsx               # app composition
+      auth/                 # app-level authentication URL/config helpers
+      errors/               # application error boundary
+      providers/            # global context/provider composition
+      routing/              # route table
+    features/
+      auth/pages/           # login, registration, onboarding
+      cart/pages/           # cart
+      catalog/              # course discovery, details, course-owned UI
+      checkout/pages/       # checkout flow
+      instructor-dashboard/ # instructor portal
+      learning/             # lesson player, quiz, attachments, progress
+      marketing/pages/      # home, guide, not-found
+      profile/pages/        # learner profile
+      student-dashboard/    # learner portal
+    components/
+      common/               # shared product components
+      integrations/         # external platform integrations
+      layout/               # shared site and portal layouts
+      ui/                   # Radix/shadcn primitives
+    contexts/               # cross-feature state providers
+    hooks/                  # reusable hooks/context accessors
+    lib/                    # mock data and pure helpers
+    types/                  # shared TypeScript contracts
+    index.css               # design tokens, RTL, responsive styles
 server/
-  index.ts                  # scaffold placeholder، لم يتم تعديله
+  index.ts                  # static hosting and SPA fallback
 shared/
-  const.ts
+  const.ts                  # client/server shared constants
+docs/
+  architecture.md           # dependency rules and feature conventions
 README.md
 ```
+
+قواعد الاعتماد بين الطبقات موضحة في [دليل المعمارية](docs/architecture.md). مسارات الصفحات تُسجّل في `client/src/app/routing/AppRouter.tsx`، بينما تبقى المكوّنات الخاصة بمجال داخل مجلد الـfeature نفسه.
 
 ## المكتبات المستخدمة
 

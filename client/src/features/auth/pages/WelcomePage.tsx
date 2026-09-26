@@ -3,7 +3,7 @@ import { Link, useLocation } from 'wouter';
 import { Sparkles, ArrowLeft, Play, Search } from 'lucide-react';
 import { PortalHeader } from '@/components/layout/PortalHeader';
 import { PortalGate } from '@/components/layout/PortalLayout';
-import { CourseCard } from '@/components/course/CourseCard';
+import { CourseCard } from '@/features/catalog/components/CourseCard';
 import { EmptyState } from '@/components/common/EmptyState';
 import { useAuth } from '@/hooks/useAuth';
 import { courses, formatPrice } from '@/lib/data';

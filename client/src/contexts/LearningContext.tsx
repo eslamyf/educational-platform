@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
-import type { Module, Lesson, LessonNote, Course } from '@/types';
+import type { Module, Lesson } from '@/types';
 import { courses } from '@/lib/data';
 import { toast } from 'sonner';
 
 const MODULES_STORAGE_KEY = 'nawa-course-content';
-const NOTES_STORAGE_KEY = 'nawa-lesson-notes';
 const COMPLETED_STORAGE_KEY = 'nawa-completed-lessons';
+const WATCHED_STORAGE_KEY = 'nawa-watched-lessons';
 const QUIZ_ANSWERS_STORAGE_KEY = 'nawa-quiz-answers';
 
 export const defaultLearningModules: Module[] = courses[0].modules.map((module, moduleIndex) => ({
@@ -29,14 +29,13 @@ export const defaultLearningModules: Module[] = courses[0].modules.map((module, 
 interface LearningContextType {
   modules: Module[];
   completedLessons: string[];
-  notes: LessonNote[];
+  watchedLessons: string[];
   quizAnswers: Record<string, number>;
-  toggleLessonCompletion: (lessonTitle: string) => void;
-  isLessonCompleted: (lessonTitle: string) => boolean;
-  addNote: (lessonTitle: string, time: number, body: string, courseId?: string) => void;
-  deleteNote: (id: string) => void;
-  getNotesForLesson: (lessonTitle: string) => LessonNote[];
-  submitQuiz: (lessonTitle: string, answerIndex: number) => boolean;
+  markVideoWatched: (lessonId: string) => void;
+  isVideoWatched: (lessonId: string) => boolean;
+  completeLesson: (lessonId: string) => void;
+  isLessonCompleted: (lessonId: string) => boolean;
+  submitQuiz: (lessonId: string, answerIndex: number, isCorrect: boolean) => boolean;
   // Instructor actions
   addModule: (title: string) => void;
   deleteModule: (moduleIndex: number) => void;
@@ -60,15 +59,15 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [completedLessons, setCompletedLessons] = useState<string[]>(() => {
     try {
       const saved = window.localStorage.getItem(COMPLETED_STORAGE_KEY);
-      return saved ? JSON.parse(saved) : ['كيف نرى المشكلة قبل أن نصنع المحتوى؟'];
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return ['كيف نرى المشكلة قبل أن نصنع المحتوى؟'];
+      return [];
     }
   });
 
-  const [notes, setNotes] = useState<LessonNote[]>(() => {
+  const [watchedLessons, setWatchedLessons] = useState<string[]>(() => {
     try {
-      const saved = window.localStorage.getItem(NOTES_STORAGE_KEY);
+      const saved = window.localStorage.getItem(WATCHED_STORAGE_KEY);
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -102,11 +101,11 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes));
+      window.localStorage.setItem(WATCHED_STORAGE_KEY, JSON.stringify(watchedLessons));
     } catch {
       // ignore
     }
-  }, [notes]);
+  }, [watchedLessons]);
 
   useEffect(() => {
     try {
@@ -116,52 +115,29 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [quizAnswers]);
 
-  const toggleLessonCompletion = (lessonTitle: string) => {
-    setCompletedLessons((prev) => {
-      const isDone = prev.includes(lessonTitle);
-      const next = isDone ? prev.filter((t) => t !== lessonTitle) : [...prev, lessonTitle];
-      if (!isDone) {
-        toast.success('رائع! تم تسجيل إتمام الدرس');
-      } else {
-        toast.info('تم إلغاء علامة إتمام الدرس');
-      }
-      return next;
-    });
+  const markVideoWatched = (lessonId: string) => {
+    setWatchedLessons((prev) => prev.includes(lessonId) ? prev : [...prev, lessonId]);
   };
 
-  const isLessonCompleted = (lessonTitle: string) => completedLessons.includes(lessonTitle);
+  const isVideoWatched = (lessonId: string) => watchedLessons.includes(lessonId);
 
-  const addNote = (lessonTitle: string, time: number, body: string, courseId?: string) => {
-    if (!body.trim()) {
-      toast.error('يرجى كتابة نص الملاحظة');
+  const completeLesson = (lessonId: string) => {
+    if (!watchedLessons.includes(lessonId) || completedLessons.includes(lessonId)) return;
+    const [moduleIndex, lessonIndex] = lessonId.split(':').slice(-2).map(Number);
+    const quiz = modules[moduleIndex]?.lessons[lessonIndex]?.quiz;
+    if (quiz && quizAnswers[lessonId] !== quiz.correct) {
+      toast.error('أجب عن مهمة الدرس إجابة صحيحة قبل إكماله');
       return;
     }
-    const newNote: LessonNote = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      courseId,
-      lesson: lessonTitle,
-      time: Math.floor(time),
-      body: body.trim(),
-      createdAt: new Date().toISOString(),
-    };
-    setNotes((prev) => [...prev, newNote]);
-    const minutes = Math.floor(time / 60).toString().padStart(2, '0');
-    const seconds = Math.floor(time % 60).toString().padStart(2, '0');
-    toast.success(`تم حفظ الملاحظة عند ${minutes}:${seconds}`);
+    setCompletedLessons((prev) => [...prev, lessonId]);
+    toast.success('اكتمل الدرس، وتم فتح الدرس التالي');
   };
 
-  const deleteNote = (id: string) => {
-    setNotes((prev) => prev.filter((n) => n.id !== id));
-    toast.success('تم حذف الملاحظة');
-  };
+  const isLessonCompleted = (lessonId: string) => completedLessons.includes(lessonId);
 
-  const getNotesForLesson = (lessonTitle: string) => {
-    return notes.filter((n) => n.lesson === lessonTitle);
-  };
-
-  const submitQuiz = (lessonTitle: string, answerIndex: number) => {
-    setQuizAnswers((prev) => ({ ...prev, [lessonTitle]: answerIndex }));
-    return true;
+  const submitQuiz = (lessonId: string, answerIndex: number, isCorrect: boolean) => {
+    if (isCorrect) setQuizAnswers((prev) => ({ ...prev, [lessonId]: answerIndex }));
+    return isCorrect;
   };
 
   // Instructor Actions
@@ -194,7 +170,7 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           title: lessonData.title || 'محاضرة جديدة',
           duration: lessonData.duration || '15:00',
           free: lessonData.free || false,
-          video: lessonData.video || 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+          video: lessonData.video || '',
           files: lessonData.files || [],
           quiz: lessonData.quiz,
         };
@@ -233,13 +209,12 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     () => ({
       modules,
       completedLessons,
-      notes,
+      watchedLessons,
       quizAnswers,
-      toggleLessonCompletion,
+      markVideoWatched,
+      isVideoWatched,
+      completeLesson,
       isLessonCompleted,
-      addNote,
-      deleteNote,
-      getNotesForLesson,
       submitQuiz,
       addModule,
       deleteModule,
@@ -247,7 +222,7 @@ export const LearningProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       deleteLesson,
       resetModules,
     }),
-    [modules, completedLessons, notes, quizAnswers]
+    [modules, completedLessons, watchedLessons, quizAnswers]
   );
 
   return <LearningContext.Provider value={value}>{children}</LearningContext.Provider>;

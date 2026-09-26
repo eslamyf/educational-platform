@@ -6,16 +6,17 @@ import { toast } from 'sonner';
 
 interface LessonQuizProps {
   quiz: QuizQuestion;
-  lessonTitle: string;
+  lessonId: string;
+  disabled?: boolean;
 }
 
-export const LessonQuiz: React.FC<LessonQuizProps> = ({ quiz, lessonTitle }) => {
+export const LessonQuiz: React.FC<LessonQuizProps> = ({ quiz, lessonId, disabled = false }) => {
   const { quizAnswers, submitQuiz } = useLearning();
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(
-    quizAnswers[lessonTitle] !== undefined ? quizAnswers[lessonTitle] : null
+    quizAnswers[lessonId] !== undefined ? quizAnswers[lessonId] : null
   );
   const [isSubmitted, setIsSubmitted] = useState<boolean>(
-    quizAnswers[lessonTitle] !== undefined
+    quizAnswers[lessonId] !== undefined
   );
 
   const handleSubmit = () => {
@@ -23,9 +24,9 @@ export const LessonQuiz: React.FC<LessonQuizProps> = ({ quiz, lessonTitle }) => 
       toast.error('يرجى اختيار إجابة أولاً');
       return;
     }
-    submitQuiz(lessonTitle, selectedAnswer);
+    const isCorrect = submitQuiz(lessonId, selectedAnswer, selectedAnswer === quiz.correct);
     setIsSubmitted(true);
-    if (selectedAnswer === quiz.correct) {
+    if (isCorrect) {
       toast.success('إجابة صحيحة! أحسنت');
     } else {
       toast.error('إجابة غير صحيحة، حاول مجددًا');
@@ -46,7 +47,13 @@ export const LessonQuiz: React.FC<LessonQuizProps> = ({ quiz, lessonTitle }) => 
       </div>
       <h3>{quiz.question}</h3>
 
-      <div className="lesson-quiz-options">
+      {disabled && (
+        <div className="quiz-feedback retry">
+          أكمل مشاهدة الفيديو بالكامل لفتح المهمة.
+        </div>
+      )}
+
+      {!disabled && <div className="lesson-quiz-options">
         {quiz.options.map((option, index) => {
           const isSelected = selectedAnswer === index;
           const showAsCorrect = isSubmitted && index === quiz.correct;
@@ -62,15 +69,15 @@ export const LessonQuiz: React.FC<LessonQuizProps> = ({ quiz, lessonTitle }) => 
               onClick={() => !isSubmitted && setSelectedAnswer(index)}
               disabled={isSubmitted}
             >
-              <span className="quiz-letter">{String.fromCharCode(1575 + index)}</span>
+              <span className="quiz-letter">{['أ', 'ب', 'ج', 'د'][index] ?? index + 1}</span>
               <span className="quiz-text">{option}</span>
               {showAsCorrect && <CheckCircle2 size={16} className="quiz-status-icon text-success" />}
             </button>
           );
         })}
-      </div>
+      </div>}
 
-      {isSubmitted ? (
+      {disabled ? null : isSubmitted ? (
         <div className={`quiz-feedback ${isCorrect ? 'success' : 'retry'}`}>
           <div className="quiz-feedback-text">
             <strong>{isCorrect ? 'إجابة صحيحة وممتازة!' : 'إجابة غير دقيقة.'}</strong>

@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, GraduationCap, BarChart3, ChevronDown, RotateCcw } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { CourseCard } from '@/components/course/CourseCard';
+import { CourseCard } from '@/features/catalog/components/CourseCard';
 import { EmptyState } from '@/components/common/EmptyState';
 import { courses, categories, gradeChips, subjectChips } from '@/lib/data';
 import type { Course } from '@/types';

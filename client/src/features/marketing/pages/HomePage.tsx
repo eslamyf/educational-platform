@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { CourseCard } from '@/components/course/CourseCard';
+import { CourseCard } from '@/features/catalog/components/CourseCard';
 import { StarRating } from '@/components/common/StarRating';
 import {
   courses,

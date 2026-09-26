@@ -16,6 +16,7 @@ import {
 import { PortalLayout } from '@/components/layout/PortalLayout';
 import { useLearning } from '@/hooks/useLearning';
 import { courses } from '@/lib/data';
+import { getYouTubeVideoId } from '@/lib/youtube';
 import { toast } from 'sonner';
 
 export const InstructorDashboardPage: React.FC = () => {
@@ -31,7 +32,7 @@ export const InstructorDashboardPage: React.FC = () => {
   const [selectedModule, setSelectedModule] = useState<number>(0);
   const [newModuleTitle, setNewModuleTitle] = useState('');
   const [newLessonTitle, setNewLessonTitle] = useState('');
-  const [videoUrl, setVideoUrl] = useState('https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4');
+  const [videoUrl, setVideoUrl] = useState('');
   const [fileName, setFileName] = useState('');
   const [quizEnabled, setQuizEnabled] = useState(true);
 
@@ -48,6 +49,10 @@ export const InstructorDashboardPage: React.FC = () => {
   const handleAddLesson = () => {
     if (!newLessonTitle.trim()) {
       toast.error('يرجى كتابة عنوان المحاضرة');
+      return;
+    }
+    if (!getYouTubeVideoId(videoUrl)) {
+      toast.error('أدخل رابط YouTube صالحًا بصيغة watch أو youtu.be أو Shorts');
       return;
     }
     addLesson(selectedModule, {
@@ -70,6 +75,7 @@ export const InstructorDashboardPage: React.FC = () => {
         : undefined,
     });
     setNewLessonTitle('');
+    setVideoUrl('');
     setFileName('');
   };
 
@@ -247,11 +253,12 @@ export const InstructorDashboardPage: React.FC = () => {
                   />
                 </label>
                 <label>
-                  رابط الفيديو (MP4 أو Embed)
+                  رابط فيديو YouTube
                   <input
+                    type="url"
                     value={videoUrl}
                     onChange={(e) => setVideoUrl(e.target.value)}
-                    placeholder="https://..."
+                    placeholder="https://www.youtube.com/watch?v=..."
                   />
                 </label>
                 <label>

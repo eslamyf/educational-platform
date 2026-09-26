@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRoute, Link } from 'wouter';
 import {
   ChevronLeft,
@@ -11,39 +11,38 @@ import {
   ArrowRight,
   ArrowLeft,
   FolderOpen,
+  ChevronDown,
 } from 'lucide-react';
 import { PortalHeader } from '@/components/layout/PortalHeader';
 import { PortalGate } from '@/components/layout/PortalLayout';
-import { VideoPlayer } from '@/components/learning/VideoPlayer';
-import { LessonNotes } from '@/components/learning/LessonNotes';
-import { LessonQuiz } from '@/components/learning/LessonQuiz';
-import { LessonAttachments } from '@/components/learning/LessonAttachments';
+import { VideoPlayer } from '@/features/learning/components/VideoPlayer';
+import { LessonQuiz } from '@/features/learning/components/LessonQuiz';
+import { LessonAttachments } from '@/features/learning/components/LessonAttachments';
 import { useAuth } from '@/hooks/useAuth';
 import { useLearning } from '@/hooks/useLearning';
 import { courses } from '@/lib/data';
+import { toast } from 'sonner';
 
 export const LearnCoursePage: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [, params] = useRoute('/learn/:id');
   const courseId = params?.id || 'creative-strategy';
   const course = courses.find((item) => item.id === courseId) ?? courses[0];
 
   const {
     modules,
-    completedLessons,
-    toggleLessonCompletion,
+    quizAnswers,
+    markVideoWatched,
+    completeLesson,
     isLessonCompleted,
+    isVideoWatched,
   } = useLearning();
 
   const [moduleIndex, setModuleIndex] = useState(0);
   const [lessonIndex, setLessonIndex] = useState(0);
-  const [videoTime, setVideoTime] = useState(0);
-  const [jumpTime, setJumpTime] = useState<number | null>(null);
+  const [expandedModuleIndex, setExpandedModuleIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'overview' | 'resources'>('overview');
-
-  if (!isAuthenticated) {
-    return <PortalGate />;
-  }
+  const autoAdvanceForRef = useRef<string | null>(null);
 
   const activeModule = modules[moduleIndex] ?? modules[0];
   const activeLesson = activeModule?.lessons[lessonIndex] ?? activeModule?.lessons[0];
@@ -54,6 +53,7 @@ export const LearnCoursePage: React.FC = () => {
       moduleIndex: modIdx,
       lessonIndex: lesIdx,
       moduleTitle: mod.title,
+      id: `${user?.email?.toLowerCase() || 'student'}:${course.id}:${modIdx}:${lesIdx}`,
     }))
   );
 
@@ -65,21 +65,46 @@ export const LearnCoursePage: React.FC = () => {
   const nextLessonItem = allLessons[currentLessonPos + 1];
 
   const selectLesson = (targetModuleIdx: number, targetLessonIdx: number) => {
+    const target = allLessons.findIndex(
+      (item) => item.moduleIndex === targetModuleIdx && item.lessonIndex === targetLessonIdx
+    );
+    if (target > 0 && !isLessonCompleted(allLessons[target - 1].id)) {
+      toast.info('أكمل الفيديو ومهمة الدرس السابق أولًا لفتح هذه المحاضرة');
+      return;
+    }
     setModuleIndex(targetModuleIdx);
     setLessonIndex(targetLessonIdx);
-    setJumpTime(null);
+    setExpandedModuleIndex(targetModuleIdx);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleJumpToTime = (time: number) => {
-    setJumpTime(time);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const isCompleted = activeLesson ? isLessonCompleted(activeLesson.title) : false;
-  const completedCount = completedLessons.length;
+  const activeLessonId = allLessons[currentLessonPos]?.id ?? '';
+  const isCompleted = activeLesson ? isLessonCompleted(activeLessonId) : false;
+  const videoWatched = activeLesson ? isVideoWatched(activeLessonId) : false;
+  const quizPassed = !activeLesson?.quiz || quizAnswers[activeLessonId] === activeLesson.quiz.correct;
+  const canCompleteLesson = videoWatched && quizPassed;
+  const completedCount = allLessons.filter((item) => isLessonCompleted(item.id)).length;
   const totalLessonsCount = allLessons.length || course.lessons;
   const progressPercent = Math.min(100, Math.round((completedCount / totalLessonsCount) * 100));
+
+  useEffect(() => {
+    if (!isAuthenticated || !activeLessonId || !canCompleteLesson || isCompleted) return;
+    if (autoAdvanceForRef.current === activeLessonId) return;
+
+    autoAdvanceForRef.current = activeLessonId;
+    completeLesson(activeLessonId);
+    if (nextLessonItem) {
+      setModuleIndex(nextLessonItem.moduleIndex);
+      setLessonIndex(nextLessonItem.lessonIndex);
+      setExpandedModuleIndex(nextLessonItem.moduleIndex);
+      setActiveTab('overview');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [isAuthenticated, activeLessonId, canCompleteLesson, isCompleted, completeLesson, nextLessonItem]);
+
+  if (!isAuthenticated) {
+    return <PortalGate />;
+  }
 
   return (
     <div className="learn-page">
@@ -101,9 +126,11 @@ export const LearnCoursePage: React.FC = () => {
               lesson={activeLesson}
               moduleTitle={activeModule.title}
               posterImage={course.image}
-              currentTime={videoTime}
-              onTimeUpdate={(t) => setVideoTime(t)}
-              jumpTime={jumpTime}
+              lessonId={activeLessonId}
+              isWatched={videoWatched}
+              studentName={user?.name || 'طالب نَوَى'}
+              studentNationalId={user?.nationalId || ''}
+              onWatched={() => markVideoWatched(activeLessonId)}
             />
           )}
 
@@ -123,10 +150,17 @@ export const LearnCoursePage: React.FC = () => {
               <button
                 type="button"
                 className={`complete-btn ${isCompleted ? 'done' : ''}`}
-                onClick={() => toggleLessonCompletion(activeLesson.title)}
+                disabled={isCompleted || !canCompleteLesson}
+                onClick={() => completeLesson(activeLessonId)}
               >
                 {isCompleted ? <CheckCircle2 size={17} /> : <Check size={17} />}
-                {isCompleted ? 'مكتملة ومحفوظة' : 'تسجيل إتمام الدرس'}
+                {isCompleted
+                  ? 'مكتملة ومحفوظة'
+                  : !videoWatched
+                    ? 'شاهد الفيديو بالكامل'
+                    : !quizPassed
+                      ? 'أجب عن المهمة لفتح التالي'
+                      : 'إكمال الدرس وفتح التالي'}
               </button>
             )}
           </div>
@@ -138,7 +172,7 @@ export const LearnCoursePage: React.FC = () => {
               className={activeTab === 'overview' ? 'active' : ''}
               onClick={() => setActiveTab('overview')}
             >
-              نظرة المحاضرة والملاحظات
+              نظرة المحاضرة
             </button>
             <button
               type="button"
@@ -149,7 +183,7 @@ export const LearnCoursePage: React.FC = () => {
             </button>
           </div>
 
-          {/* Tab 1: Overview & Notes */}
+          {/* Tab 1: Lesson Overview */}
           {activeTab === 'overview' && (
             <>
               <section className="lesson-overview">
@@ -165,19 +199,11 @@ export const LearnCoursePage: React.FC = () => {
                     <Video size={15} /> جودة الفيديو: HD عالية الوضوح
                   </span>
                   <span>
-                    <CheckCircle2 size={15} /> الحالة: {isCompleted ? 'مكتملة' : 'قيد التعلّم'}
+                    <CheckCircle2 size={15} /> الحالة: {isCompleted ? 'مكتملة' : videoWatched ? 'الفيديو مكتمل' : 'قيد التعلّم'}
                   </span>
                 </div>
               </section>
 
-              {activeLesson && (
-                <LessonNotes
-                  lessonTitle={activeLesson.title}
-                  currentTime={videoTime}
-                  courseId={course.id}
-                  onJumpToTime={handleJumpToTime}
-                />
-              )}
             </>
           )}
 
@@ -195,7 +221,12 @@ export const LearnCoursePage: React.FC = () => {
 
               {activeLesson?.quiz && (
                 <div style={{ marginTop: 32 }}>
-                  <LessonQuiz quiz={activeLesson.quiz} lessonTitle={activeLesson.title} />
+                  <LessonQuiz
+                    key={activeLessonId}
+                    quiz={activeLesson.quiz}
+                    lessonId={activeLessonId}
+                    disabled={!videoWatched}
+                  />
                 </div>
               )}
             </section>
@@ -217,12 +248,12 @@ export const LearnCoursePage: React.FC = () => {
 
             <button
               type="button"
-              disabled={!nextLessonItem}
               onClick={() => {
-                if (nextLessonItem) {
+                if (nextLessonItem && isCompleted) {
                   selectLesson(nextLessonItem.moduleIndex, nextLessonItem.lessonIndex);
                 }
               }}
+              disabled={!nextLessonItem || !isCompleted}
             >
               المحاضرة التالية <ArrowLeft size={15} />
             </button>
@@ -248,28 +279,46 @@ export const LearnCoursePage: React.FC = () => {
           </p>
 
           <div className="learn-module-list">
-            {modules.map((mod, modIdx) => (
-              <div className="learn-module" key={mod.title}>
-                <div className="learn-module-title">
+            {modules.map((mod, modIdx) => {
+              const isExpanded = expandedModuleIndex === modIdx;
+
+              return (
+              <div className={`learn-module ${isExpanded ? 'expanded' : ''}`} key={mod.title}>
+                <button
+                  type="button"
+                  className="learn-module-title"
+                  aria-expanded={isExpanded}
+                  onClick={() => setExpandedModuleIndex(isExpanded ? -1 : modIdx)}
+                >
                   <span>{String(modIdx + 1).padStart(2, '0')}</span>
                   <strong>{mod.title}</strong>
-                </div>
+                  <small>{mod.lessons.length} درس</small>
+                  <ChevronDown size={15} className="learn-module-chevron" />
+                </button>
 
-                {mod.lessons.map((les, lesIdx) => {
+                {isExpanded && <div className="learn-module-lessons">{mod.lessons.map((les, lesIdx) => {
                   const isCurrent = moduleIndex === modIdx && lessonIndex === lesIdx;
-                  const isDone = isLessonCompleted(les.title);
+                  const lessonPosition = allLessons.findIndex(
+                    (item) => item.moduleIndex === modIdx && item.lessonIndex === lesIdx
+                  );
+                  const lessonId = allLessons[lessonPosition]?.id ?? '';
+                  const isDone = isLessonCompleted(lessonId);
+                  const isUnlocked = lessonPosition === 0 || isLessonCompleted(allLessons[lessonPosition - 1]?.id ?? '');
 
                   return (
                     <button
                       type="button"
                       className={`learn-lesson ${isCurrent ? 'current' : ''}`}
                       key={les.title}
+                      disabled={!isUnlocked}
+                      aria-disabled={!isUnlocked}
+                      title={!isUnlocked ? 'أكمل الدرس السابق لفتح هذه المحاضرة' : les.title}
                       onClick={() => selectLesson(modIdx, lesIdx)}
                     >
                       <span className="learn-lesson-status">
                         {isDone ? (
                           <CheckCircle2 size={14} className="text-success" />
-                        ) : les.free ? (
+                        ) : isUnlocked ? (
                           <Play size={12} />
                         ) : (
                           <LockKeyhole size={13} />
@@ -279,9 +328,10 @@ export const LearnCoursePage: React.FC = () => {
                       <small>{les.duration}</small>
                     </button>
                   );
-                })}
+                })}</div>}
               </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="learn-sidebar-footer">

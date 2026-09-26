@@ -8,7 +8,7 @@ interface LessonAttachmentsProps {
 
 export const LessonAttachments: React.FC<LessonAttachmentsProps> = ({ files = [] }) => {
   const handleDownload = (filename: string) => {
-    toast.success(`جاري تنزيل الملف المرفق: ${filename}`);
+    toast.info(`المرفق "${filename}" تجريبي ولا يتوفر للتنزيل حاليًا`);
   };
 
   if (!files || files.length === 0) {

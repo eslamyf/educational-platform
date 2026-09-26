@@ -1,3 +1,5 @@
+import founderHeroAsset from '@/img/nawa-founder-hero.png';
+
 import type { Course, Lesson, Module, Review, CartItem, ProgressCourse } from '@/types';
 export type { Course, Lesson, Module, Review, CartItem, ProgressCourse };
 
@@ -117,7 +119,7 @@ export const egyptEducationOptions = {
 export const formatPrice = (price: number) => `${price.toLocaleString('ar-EG')} ج.م`;
 
 export const featuredCourse = courses[0];
-export const founderHeroImage = '/manus-storage/nawa-founder-hero_283408a2.png';
+export const founderHeroImage = founderHeroAsset;
 
 export const navItems = [
   { label: 'الرئيسية', href: '/' },

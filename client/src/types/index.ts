@@ -81,15 +81,6 @@ export type UserSession = {
   profile: UserProfile;
 };
 
-export type LessonNote = {
-  id: string;
-  courseId?: string;
-  lesson: string;
-  time: number;
-  body: string;
-  createdAt?: string;
-};
-
 export type ProgressCourse = Course & {
   progress: number;
   nextLesson: string;

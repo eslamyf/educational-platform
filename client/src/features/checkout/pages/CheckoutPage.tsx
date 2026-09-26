@@ -11,10 +11,12 @@ import {
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { EmptyState } from '@/components/common/EmptyState';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
 import { formatPrice, secureCheckout, checkoutNote } from '@/lib/data';
 import { toast } from 'sonner';
+import { ShoppingBag } from 'lucide-react';
 
 export const CheckoutPage: React.FC = () => {
   const [, navigate] = useLocation();
@@ -38,8 +40,16 @@ export const CheckoutPage: React.FC = () => {
 
   const handleCompleteOrder = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!cart.length) {
+      navigate('/cart');
+      return;
+    }
     if (!formData.name.trim() || !formData.email.trim() || !formData.phone.trim()) {
       toast.error('يرجى ملء كافة البيانات الأساسية');
+      return;
+    }
+    if (!/^01\d{9}$/.test(formData.phone.replace(/\s/g, ''))) {
+      toast.error('رقم الهاتف يجب أن يتكون من ١١ رقمًا ويبدأ بـ01');
       return;
     }
 
@@ -73,6 +83,24 @@ export const CheckoutPage: React.FC = () => {
               </Link>
             </div>
           </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!cart.length) {
+    return (
+      <div className="page-fade">
+        <Header />
+        <main className="container checkout-page">
+          <EmptyState
+            icon={ShoppingBag}
+            title="سلتك فارغة"
+            description="أضف مسارًا تعليميًا إلى سلتك قبل متابعة الدفع."
+            actionText="العودة إلى السلة"
+            actionHref="/cart"
+          />
         </main>
         <Footer />
       </div>

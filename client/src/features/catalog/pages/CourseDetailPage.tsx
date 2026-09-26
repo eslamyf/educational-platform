@@ -18,11 +18,11 @@ import {
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { StarRating } from '@/components/common/StarRating';
-import { CurriculumList } from '@/components/course/CurriculumList';
-import { PurchaseCard } from '@/components/course/PurchaseCard';
-import { ReviewList } from '@/components/course/ReviewList';
-import { FaqAccordion } from '@/components/course/FaqAccordion';
-import { CourseCard } from '@/components/course/CourseCard';
+import { CurriculumList } from '@/features/catalog/components/CurriculumList';
+import { PurchaseCard } from '@/features/catalog/components/PurchaseCard';
+import { ReviewList } from '@/features/catalog/components/ReviewList';
+import { FaqAccordion } from '@/features/catalog/components/FaqAccordion';
+import { CourseCard } from '@/features/catalog/components/CourseCard';
 import {
   getCourse,
   relatedCourses,
