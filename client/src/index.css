@@ -601,9 +601,11 @@ img { max-width: 100%; display: block; }
 .learn-breadcrumb { display:flex; align-items:center; gap:7px; margin-bottom:17px; color:var(--muted); font-size:.68rem; }
 .learn-breadcrumb a:hover { color:var(--coral-dark); }
 .video-shell { overflow:hidden; border-radius:22px; background:var(--ink); box-shadow:var(--shadow); }
-.video-topbar { display:flex; justify-content:space-between; padding:13px 17px; color:rgba(247,243,237,.65); font-size:.68rem; }
+.video-topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; min-height:45px; padding:10px 17px; color:var(--ink); background:var(--paper-deep); font-size:.75rem; line-height:1.5; }
 .video-topbar span { display:flex; align-items:center; gap:6px; }
 .video-topbar svg { color:var(--coral); }
+.video-topbar > span:first-child { min-width:0; overflow-wrap:anywhere; }
+.video-topbar .lesson-badge-time { flex:none; color:var(--coral-dark); font-variant-numeric:tabular-nums; }
 .video-placeholder { position:relative; display:grid; place-items:center; aspect-ratio:16 / 9; overflow:hidden; background:radial-gradient(circle at 35% 30%, #626a5b, #252622 65%); }
 .video-frame { position:absolute; inset:0; width:100%; height:100%; border:0; }
 .video-grid { position:absolute; inset:0; opacity:.18; background-image:linear-gradient(rgba(247,243,237,.2) 1px, transparent 1px),linear-gradient(90deg, rgba(247,243,237,.2) 1px, transparent 1px); background-size:42px 42px; transform:perspective(450px) rotateX(55deg) scale(1.7); transform-origin:center bottom; }
