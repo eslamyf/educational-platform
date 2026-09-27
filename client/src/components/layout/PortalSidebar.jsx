@@ -27,7 +27,7 @@ export const PortalSidebar = ({ active, role: propsRole }) => {
           <span>
             {role === 'instructor'
             ? 'إدارة المنصة'
-            : `${user?.stage || 'المرحلة الثانوية'} · ${user?.grade || 'تالتة ثانوي'}`}
+            : `${user?.stage || 'المرحلة الإعدادية'} · ${user?.grade || 'الصف الثالث الإعدادي'}`}
           </span>
         </div>
       </div>

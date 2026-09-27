@@ -6,9 +6,8 @@ const defaultStudentProfile = {
     email: 'sara@example.com',
     phone: '01012345678',
     governorate: 'القاهرة',
-    stage: 'إعدادي',
-    grade: 'تالتة إعدادي',
-    year: '2026 / 2027',
+    stage: 'المرحلة الإعدادية',
+    grade: 'الصف الثالث الإعدادي',
     track: 'إعدادي عام',
     guardian: '01098765432',
     nationalId: '30401011234567',
@@ -20,18 +19,47 @@ const defaultInstructorProfile = {
     governorate: 'القاهرة',
     stage: 'إدارة المنصة',
     grade: 'معلم ومعد مسارات',
-    year: '2026 / 2027',
     track: 'تسويق وتصميم',
 };
+
+const normalizeProfile = (profile, role = 'student') => {
+    if (!profile) return role === 'instructor' ? defaultInstructorProfile : defaultStudentProfile;
+    const defaults = role === 'instructor' ? defaultInstructorProfile : defaultStudentProfile;
+    let stage = profile.stage || defaults.stage;
+    if (stage === 'إعدادي') stage = 'المرحلة الإعدادية';
+    if (stage === 'ثانوي') stage = 'الثانوية العامة';
+    if (stage === 'بكالوريا') stage = 'البكالوريا المصرية';
+
+    let grade = profile.grade || defaults.grade;
+    if (grade === 'أولى إعدادي') grade = 'الصف الأول الإعدادي';
+    if (grade === 'تانية إعدادي') grade = 'الصف الثاني الإعدادي';
+    if (grade === 'تالتة إعدادي') grade = 'الصف الثالث الإعدادي';
+    if (grade === 'أولى ثانوي') grade = 'الصف الأول الثانوي';
+    if (grade === 'تانية ثانوي') grade = 'الصف الثاني الثانوي';
+    if (grade === 'تالتة ثانوي') grade = 'الصف الثالث الثانوي';
+
+    const normalized = {
+        ...defaults,
+        ...profile,
+        stage,
+        grade,
+    };
+    delete normalized.year;
+    return normalized;
+};
+
 const AuthContext = createContext(undefined);
 export const AuthProvider = ({ children }) => {
     const [session, setSession] = useState(() => {
         try {
             const saved = window.localStorage.getItem(AUTH_STORAGE_KEY);
             if (saved) {
-                return JSON.parse(saved);
+                const parsed = JSON.parse(saved);
+                return {
+                    ...parsed,
+                    profile: normalizeProfile(parsed.profile, parsed.role),
+                };
             }
-            // Demo session default to enhance prototype experience
             return {
                 role: 'student',
                 mode: 'login',
@@ -55,35 +83,53 @@ export const AuthProvider = ({ children }) => {
         }
     }, [session]);
     const login = (email, role = 'student', name) => {
-        const profile = role === 'instructor'
-            ? { ...defaultInstructorProfile, email }
-            : { ...defaultStudentProfile, email, name: name || defaultStudentProfile.name };
+        const base = role === 'instructor' ? defaultInstructorProfile : defaultStudentProfile;
+        const profile = {
+            ...base,
+            email,
+            name: name || base.name,
+        };
         const newSession = {
             role,
             mode: 'login',
             profile,
         };
         setSession(newSession);
+        try {
+            window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession));
+        } catch { }
         toast.success(`مرحبًا بك مجددًا يا ${profile.name}!`);
     };
     const register = (profile, role = 'student') => {
+        const cleanProfile = normalizeProfile(profile, role);
         const newSession = {
             role,
             mode: 'register',
-            profile,
+            profile: cleanProfile,
         };
         setSession(newSession);
+        try {
+            window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession));
+        } catch { }
         toast.success('تم إنشاء حسابك بنجاح في نَوَى!');
     };
     const updateProfile = (partial) => {
-        if (!session)
-            return;
-        const updatedProfile = { ...session.profile, ...partial };
-        setSession({
-            ...session,
-            profile: updatedProfile,
+        setSession((prev) => {
+            if (!prev) return prev;
+            const updatedProfile = { ...prev.profile, ...partial };
+            delete updatedProfile.year;
+            const nextSession = {
+                ...prev,
+                profile: updatedProfile,
+            };
+            try {
+                window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(nextSession));
+            } catch (err) {
+                console.error('Failed to save profile update', err);
+            }
+            return nextSession;
         });
-        toast.success('تم تحديث بيانات ملفك الشخصي');
+        toast.success('تم تحديث وحفظ بيانات ملفك الشخصي');
     };
     const logout = () => {
         setSession(null);

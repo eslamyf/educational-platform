@@ -17,9 +17,8 @@ export const LoginPage = () => {
         email: '',
         phone: '',
         governorate: 'القاهرة',
-        stage: 'إعدادي',
-        grade: 'تالتة إعدادي',
-        year: '2026 / 2027',
+        stage: 'المرحلة الإعدادية',
+        grade: 'الصف الثالث الإعدادي',
         track: 'إعدادي عام',
         guardian: '',
         nationalId: '',
@@ -27,18 +26,13 @@ export const LoginPage = () => {
     const [password, setPassword] = useState('');
     const isStudent = role === 'student';
     const totalSteps = isStudent ? 3 : 2;
-    const gradeOptions = profile.stage === 'إعدادي'
-        ? ['أولى إعدادي', 'تانية إعدادي', 'تالتة إعدادي']
-        : ['أولى ثانوي', 'تانية ثانوي', 'تالتة ثانوي'];
-    const trackOptions = profile.stage === 'إعدادي'
-        ? ['إعدادي عام']
-        : [
-            'علمي علوم',
-            'علمي رياضة',
-            'أدبي',
-            'بكالوريا مصرية — الطب وعلوم الحياة',
-            'بكالوريا مصرية — الهندسة وعلوم الحاسب',
-        ];
+
+    const currentStageKey = egyptEducationOptions.stages.includes(profile.stage)
+        ? profile.stage
+        : 'المرحلة الإعدادية';
+    const currentStageInfo = egyptEducationOptions.stageMap[currentStageKey];
+    const gradeOptions = currentStageInfo.grades;
+    const trackOptions = currentStageInfo.tracks;
     const validateField = (key, value) => {
         if (key === 'name' && value.trim().length < 3) {
             return 'اكتب الاسم بالكامل (٣ أحرف على الأقل).';
@@ -311,28 +305,28 @@ export const LoginPage = () => {
 
                   {isStudent && step === 2 && (<div className="wizard-fields">
                       <div className="stage-choice">
-                        <button type="button" className={profile.stage === 'إعدادي' ? 'active' : ''} onClick={() => {
-                    setProfile((prev) => ({
-                        ...prev,
-                        stage: 'إعدادي',
-                        grade: 'تالتة إعدادي',
-                        track: 'إعدادي عام',
-                    }));
-                }}>
-                          <span>المرحلة الإعدادية</span>
-                          <small>أولى · تانية · تالتة إعدادي</small>
-                        </button>
-                        <button type="button" className={profile.stage === 'ثانوي' ? 'active' : ''} onClick={() => {
-                    setProfile((prev) => ({
-                        ...prev,
-                        stage: 'ثانوي',
-                        grade: 'أولى ثانوي',
-                        track: 'علمي علوم',
-                    }));
-                }}>
-                          <span>الثانوية العامة</span>
-                          <small>صف دراسي ومسار تخصصي</small>
-                        </button>
+                        {egyptEducationOptions.stages.map((stg) => {
+                          const info = egyptEducationOptions.stageMap[stg];
+                          const isActive = profile.stage === stg;
+                          return (
+                            <button
+                              key={stg}
+                              type="button"
+                              className={isActive ? 'active' : ''}
+                              onClick={() => {
+                                setProfile((prev) => ({
+                                  ...prev,
+                                  stage: stg,
+                                  grade: info.grades[0],
+                                  track: info.tracks[0],
+                                }));
+                              }}
+                            >
+                              <span>{info.label}</span>
+                              <small>{info.description}</small>
+                            </button>
+                          );
+                        })}
                       </div>
 
                       <div className="form-grid compact-grid">
@@ -344,19 +338,12 @@ export const LoginPage = () => {
                         </label>
 
                         <label>
-                          السنة الدراسية
-                          <select value={profile.year} onChange={(e) => updateProfileField('year', e.target.value)}>
-                            {egyptEducationOptions.years.map((y) => (<option key={y}>{y}</option>))}
+                          المسار التخصصي
+                          <select value={profile.track} onChange={(e) => updateProfileField('track', e.target.value)}>
+                            {trackOptions.map((t) => (<option key={t}>{t}</option>))}
                           </select>
                         </label>
                       </div>
-
-                      <label>
-                        المسار التخصصي
-                        <select value={profile.track} onChange={(e) => updateProfileField('track', e.target.value)}>
-                          {trackOptions.map((t) => (<option key={t}>{t}</option>))}
-                        </select>
-                      </label>
 
                       <div className="form-grid compact-grid">
                         <label>
@@ -366,16 +353,18 @@ export const LoginPage = () => {
 
                         <label>
                           الرقم القومي (اختياري)
-                          <input value={profile.nationalId || ''} onChange={(e) => updateProfileField('nationalId', e.target.value)} placeholder="١٤ رقم"/>
+                          <input value={profile.nationalId || ''} onChange={(e) => updateProfileField('nationalId', e.target.value)} placeholder="١٤ رقمًا"/>
                         </label>
                       </div>
 
                       <div className="wizard-hint">
                         <Sparkles size={15}/>
                         <span>
-                          {profile.stage === 'إعدادي'
-                    ? 'ستظهر لك فورًا مواد وتدريبات الإعدادي المقررة.'
-                    : 'ستظهر لك مواد الثانوية والمسار العلمي أو الأدبي الذي اخترته.'}
+                          {profile.stage === 'المرحلة الإعدادية'
+                            ? 'ستظهر لك فورًا مواد وتدريبات المرحلة الإعدادية المقررة.'
+                            : profile.stage === 'البكالوريا المصرية'
+                            ? 'ستظهر لك مسارات ومواد نظام البكالوريا المصرية وفق التخصص المختار.'
+                            : 'ستظهر لك مواد الثانوية والمسار العلمي أو الأدبي الذي اخترته.'}
                         </span>
                       </div>
                     </div>)}

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { CirclePlay, ShieldAlert } from 'lucide-react';
+import { CirclePlay, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { getYouTubeEmbedUrl, getYouTubeVideoId } from '@/lib/youtube';
+
 let youtubeApiPromise;
 const loadYouTubeApi = () => {
     if (window.YT?.Player)
@@ -27,7 +28,17 @@ const loadYouTubeApi = () => {
     }
     return youtubeApiPromise;
 };
-export const VideoPlayer = ({ lesson, moduleTitle, posterImage, lessonId, isWatched, studentName, studentNationalId, onWatched, }) => {
+
+export const VideoPlayer = ({
+    lesson,
+    moduleTitle,
+    posterImage,
+    lessonId,
+    isWatched,
+    studentName,
+    studentNationalId,
+    onWatched,
+}) => {
     const iframeRef = useRef(null);
     const videoRef = useRef(null);
     const playerRef = useRef(null);
@@ -36,30 +47,36 @@ export const VideoPlayer = ({ lesson, moduleTitle, posterImage, lessonId, isWatc
     const maxWatchedTimeRef = useRef(0);
     const previousTimeRef = useRef(0);
     const verifiedPlaybackRef = useRef(0);
-    const [watermarkPosition, setWatermarkPosition] = useState({ left: 14, top: 19, rotate: -3 });
+    const [watermarkPosition, setWatermarkPosition] = useState({ left: 18, top: 22, rotate: -2 });
+
     const videoId = lesson.video ? getYouTubeVideoId(lesson.video) : null;
     const looksLikeYouTubeUrl = Boolean(lesson.video && /youtube\.com|youtu\.be|youtube-nocookie\.com/i.test(lesson.video));
+
     onWatchedRef.current = onWatched;
     isWatchedRef.current = isWatched;
+
     useEffect(() => {
         const moveWatermark = () => setWatermarkPosition({
-            left: 8 + Math.random() * 64,
-            top: 10 + Math.random() * 72,
-            rotate: -5 + Math.random() * 10,
+            left: 10 + Math.random() * 60,
+            top: 12 + Math.random() * 68,
+            rotate: -3 + Math.random() * 6,
         });
-        const interval = window.setInterval(moveWatermark, 6500);
+        const interval = window.setInterval(moveWatermark, 5500);
         return () => window.clearInterval(interval);
     }, []);
+
     useEffect(() => {
         previousTimeRef.current = 0;
         maxWatchedTimeRef.current = 0;
         verifiedPlaybackRef.current = 0;
     }, [lessonId]);
+
     useEffect(() => {
         if (!videoId || !iframeRef.current || isWatched)
             return;
         let cancelled = false;
         let progressInterval = 0;
+
         loadYouTubeApi().then((youtube) => {
             if (cancelled || !iframeRef.current)
                 return;
@@ -100,6 +117,7 @@ export const VideoPlayer = ({ lesson, moduleTitle, posterImage, lessonId, isWatc
             });
             playerRef.current = player;
         }).catch(() => { });
+
         return () => {
             cancelled = true;
             window.clearInterval(progressInterval);
@@ -107,6 +125,7 @@ export const VideoPlayer = ({ lesson, moduleTitle, posterImage, lessonId, isWatc
             playerRef.current = null;
         };
     }, [videoId, lessonId, isWatched]);
+
     const handleNativeTimeUpdate = (event) => {
         const video = event.currentTarget;
         const currentTime = video.currentTime;
@@ -121,47 +140,94 @@ export const VideoPlayer = ({ lesson, moduleTitle, posterImage, lessonId, isWatc
             onWatchedRef.current();
         }
     };
+
     const handleNativeSeeking = (event) => {
         const video = event.currentTarget;
         if (!isWatchedRef.current && video.currentTime > maxWatchedTimeRef.current + 1.5) {
             video.currentTime = maxWatchedTimeRef.current;
         }
     };
+
     const handleNativePlay = (event) => {
         previousTimeRef.current = event.currentTarget.currentTime;
     };
-    return (<div className="video-shell">
-      <div className="video-topbar">
-        <span>
-          <CirclePlay size={15}/> {moduleTitle}
-        </span>
-        <span className="lesson-badge-time">{lesson.duration}</span>
-      </div>
 
-      <div className="video-placeholder">
-        {videoId ? (<iframe ref={iframeRef} className="video-frame" src={getYouTubeEmbedUrl(videoId)} title={lesson.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen/>) : looksLikeYouTubeUrl ? (<div className="video-error" role="alert">
-            <ShieldAlert size={22}/>
-            <span>رابط YouTube غير صالح. استخدم رابط فيديو أو Shorts صحيحًا.</span>
-          </div>) : lesson.video ? (<video ref={videoRef} className="video-frame" src={lesson.video} poster={posterImage} controls controlsList="nodownload noplaybackrate noremoteplayback" disablePictureInPicture disableRemotePlayback playsInline onContextMenu={(event) => event.preventDefault()} onLoadedMetadata={(event) => {
-                previousTimeRef.current = event.currentTarget.currentTime;
-                maxWatchedTimeRef.current = event.currentTarget.currentTime;
-                verifiedPlaybackRef.current = 0;
-                if (!isWatchedRef.current)
-                    event.currentTarget.currentTime = 0;
-            }} onPlay={handleNativePlay} onTimeUpdate={handleNativeTimeUpdate} onSeeking={handleNativeSeeking}/>) : (<div className="video-error" role="status">
-            <ShieldAlert size={22}/>
-            <span>لم يُضف رابط فيديو لهذا الدرس بعد.</span>
-          </div>)}
+    return (
+        <div className="video-shell">
+            <div className="video-topbar">
+                <span className="video-topbar-title">
+                    <CirclePlay size={15} /> {moduleTitle} · {lesson.title}
+                </span>
+                <div className="video-topbar-meta">
+                    <span className="video-student-badge">
+                        <ShieldCheck size={13} /> {studentName} {studentNationalId ? `(${studentNationalId})` : ''}
+                    </span>
+                    <span className="lesson-badge-time">{lesson.duration}</span>
+                </div>
+            </div>
 
-        <span className="video-watermark video-watermark-dynamic" style={{
-            left: `${watermarkPosition.left}%`,
-            top: `${watermarkPosition.top}%`,
-            transform: `translate(-50%, -50%) rotate(${watermarkPosition.rotate}deg)`,
-        }} aria-hidden="true">
-          <strong>{studentName}</strong>
-          {studentNationalId && <small>الرقم القومي {studentNationalId}</small>}
-        </span>
-      </div>
-    </div>);
+            <div className="video-placeholder">
+                {videoId ? (
+                    <iframe
+                        ref={iframeRef}
+                        className="video-frame"
+                        src={getYouTubeEmbedUrl(videoId)}
+                        title={lesson.title}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        allowFullScreen
+                    />
+                ) : looksLikeYouTubeUrl ? (
+                    <div className="video-error" role="alert">
+                        <ShieldAlert size={22} />
+                        <span>رابط YouTube غير صالح. استخدم رابط فيديو أو Shorts صحيحًا.</span>
+                    </div>
+                ) : lesson.video ? (
+                    <video
+                        ref={videoRef}
+                        className="video-frame"
+                        src={lesson.video}
+                        poster={posterImage}
+                        controls
+                        controlsList="nodownload noplaybackrate noremoteplayback"
+                        disablePictureInPicture
+                        disableRemotePlayback
+                        playsInline
+                        onContextMenu={(event) => event.preventDefault()}
+                        onLoadedMetadata={(event) => {
+                            previousTimeRef.current = event.currentTarget.currentTime;
+                            maxWatchedTimeRef.current = event.currentTarget.currentTime;
+                            verifiedPlaybackRef.current = 0;
+                            if (!isWatchedRef.current)
+                                event.currentTarget.currentTime = 0;
+                        }}
+                        onPlay={handleNativePlay}
+                        onTimeUpdate={handleNativeTimeUpdate}
+                        onSeeking={handleNativeSeeking}
+                    />
+                ) : (
+                    <div className="video-error" role="status">
+                        <ShieldAlert size={22} />
+                        <span>لم يُضف رابط فيديو لهذا الدرس بعد.</span>
+                    </div>
+                )}
+
+                {/* Inline, slim, non-intrusive floating watermark */}
+                <span
+                    className="video-watermark video-watermark-dynamic"
+                    style={{
+                        left: `${watermarkPosition.left}%`,
+                        top: `${watermarkPosition.top}%`,
+                        transform: `translate(-50%, -50%) rotate(${watermarkPosition.rotate}deg)`,
+                    }}
+                    aria-hidden="true"
+                >
+                    <span className="watermark-name">{studentName}</span>
+                    {studentNationalId && <span className="watermark-id">· الرقم القومي {studentNationalId}</span>}
+                </span>
+            </div>
+        </div>
+    );
 };
+
 export default VideoPlayer;
