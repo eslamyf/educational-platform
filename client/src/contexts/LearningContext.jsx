@@ -9,24 +9,54 @@ export const defaultLearningModules = courses[0].modules.map((module, moduleInde
     ...module,
     lessons: module.lessons.map((lesson, lessonIndex) => ({
         ...lesson,
-        files: moduleIndex === 0 && lessonIndex === 0 ? ['خريطة استراتيجية المحتوى.pdf', 'قالب تخطيط أسبوعي.fig'] : [],
-        video: lesson.video || 'https://www.youtube.com/watch?v=w7ejDZ8SWv8',
+        files: moduleIndex === 0 && lessonIndex === 0 ? ['ملخص الدعامة في النبات والتنسيق الهرموني.pdf', 'خرائط ذهنية للمناعة والـ DNA.pdf'] : [],
+        video: lesson.video || 'https://www.youtube.com/watch?v=_wmwmMeF3pE',
         quiz: moduleIndex === 0 && lessonIndex === 1
             ? {
-                question: 'ما الخطوة الأساسية التي تسبق صناعة المحتوى؟',
-                options: ['النشر الفوري على كل المنصات', 'فهم الجمهور والمشكلة وتحديد الوعد التحريري', 'اختيار المؤثرات البصرية والألوان', 'نسخ المحتوى الأكثر رواجًا عند المنافسين'],
+                question: 'ما هو التركيب الأساسي المسؤول عن الدعامة التركيبية في جدار الخلية النباتية؟',
+                options: ['الفجوة العصارية وتغير الضغط الأسموزي', 'ترسيب السيليلوز واللجنين والكيوتين والسيوبيرين', 'البلاستيدات الخضراء وإنتاج الغذاء', 'السيتوبلازم وتدفق الأملاح الذائبة'],
                 correct: 1,
-                explanation: 'فهم الجمهور وتحديد الاحتياج الحقيقي هو الأساس الذي تُبنى عليه أي استراتيجية محتوى ناجحة.',
+                explanation: 'تعتمد الدعامة التركيبية على ترسب مواد صلبة قوية مثل السيليلوز واللجنين على جدر الخلايا لإكسابها الصلابة والقوة ومنع فقد الماء.',
             }
             : undefined,
     })),
 }));
+
+const sanitizeStoredModules = (mods) => {
+    if (!Array.isArray(mods)) return defaultLearningModules;
+    return mods.map((mod, modIdx) => ({
+        ...mod,
+        lessons: (mod.lessons || []).map((les, lesIdx) => {
+            let vid = les.video || '';
+            if (!vid || vid.includes('2a_eG8wP51A') || vid.includes('bAysXmB7d_Q') || vid.includes('8VwQ9fT2f7Q') || vid.includes('w7ejDZ8SWv8') || vid.includes('kGgA4j6v9hU')) {
+                vid = courses[0]?.modules[modIdx]?.lessons[lesIdx]?.video || 'https://www.youtube.com/watch?v=_wmwmMeF3pE';
+            }
+            return {
+                ...les,
+                video: vid,
+            };
+        }),
+    }));
+};
+
 const LearningContext = createContext(undefined);
 export const LearningProvider = ({ children }) => {
     const [modules, setModules] = useState(() => {
         try {
             const saved = window.localStorage.getItem(MODULES_STORAGE_KEY);
-            return saved ? JSON.parse(saved) : defaultLearningModules;
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (
+                    Array.isArray(parsed) &&
+                    parsed.length > 0 &&
+                    parsed[0]?.title &&
+                    !parsed[0]?.title?.includes('استراتيجية') &&
+                    !JSON.stringify(parsed).includes('خريطة استراتيجية')
+                ) {
+                    return sanitizeStoredModules(parsed);
+                }
+            }
+            return defaultLearningModules;
         }
         catch {
             return defaultLearningModules;

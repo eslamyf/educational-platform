@@ -22,12 +22,12 @@ export const PortalSidebar = ({ active, role: propsRole }) => {
     return (<aside className="portal-sidebar">
       <div className="sidebar-profile">
         <div className="sidebar-avatar">{avatarLetter}</div>
-        <div>
+        <div className="sidebar-profile-info">
           <strong>{user?.name || (role === 'instructor' ? 'صاحب المنصة' : 'سارة أحمد')}</strong>
           <span>
             {role === 'instructor'
             ? 'إدارة المنصة'
-            : `${user?.stage || 'المرحلة الإعدادية'} · ${user?.grade || 'الصف الثالث الإعدادي'}`}
+            : `${user?.stage || 'المرحلة الثانوية'} · ${user?.grade || 'الصف الثالث الثانوي'}`}
           </span>
         </div>
       </div>

@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 export const LearnCoursePage = () => {
     const { isAuthenticated, user } = useAuth();
     const [, params] = useRoute('/learn/:id');
-    const courseId = params?.id || 'creative-strategy';
+    const courseId = params?.id || 'secondary-biology';
     const course = courses.find((item) => item.id === courseId) ?? courses[0];
     const { modules, quizAnswers, markVideoWatched, completeLesson, isLessonCompleted, isVideoWatched, } = useLearning();
     const [moduleIndex, setModuleIndex] = useState(0);
@@ -84,7 +84,18 @@ export const LearnCoursePage = () => {
           </div>
 
           {/* Video Player */}
-          {activeLesson && (<VideoPlayer lesson={activeLesson} moduleTitle={activeModule.title} posterImage={course.image} lessonId={activeLessonId} isWatched={videoWatched} studentName={user?.name || 'طالب نَوَى'} studentNationalId={user?.nationalId || ''} onWatched={() => markVideoWatched(activeLessonId)}/>)}
+          {activeLesson && (
+            <VideoPlayer
+              lesson={activeLesson}
+              moduleTitle={activeModule.title}
+              posterImage={course.image}
+              lessonId={activeLessonId}
+              isWatched={videoWatched}
+              studentName={user?.name || 'سارة أحمد'}
+              studentNationalId={user?.nationalId || '30401011234567'}
+              onWatched={() => markVideoWatched(activeLessonId)}
+            />
+          )}
 
           {/* Title & Complete Action Row */}
           <div className="learn-title-row">

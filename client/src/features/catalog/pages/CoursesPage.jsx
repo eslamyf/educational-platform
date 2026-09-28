@@ -22,10 +22,16 @@ export const CoursesPage = () => {
     const filteredCourses = useMemo(() => {
         const result = courses.filter((course) => {
             const matchCategory = category === categories[0] || course.category === category;
-            const matchGrade = grade === gradeChips[0] || course.tags.includes(grade);
+            const matchGrade = grade === gradeChips[0] || course.tags.includes(grade) || course.level === grade;
             const matchSubject = subject === subjectChips[0] ||
-                course.tags.some((tag) => tag.includes(subject)) ||
-                course.title.includes(subject);
+                course.tags.some((tag) => tag.includes(subject) || subject.includes(tag)) ||
+                course.title.includes(subject) ||
+                (subject.includes('أحياء') && (course.title.includes('أحياء') || course.tags.includes('أحياء'))) ||
+                (subject.includes('فيزياء') && (course.title.includes('فيزياء') || course.tags.includes('فيزياء'))) ||
+                (subject.includes('كيمياء') && (course.title.includes('كيمياء') || course.tags.includes('كيمياء'))) ||
+                (subject.includes('رياضيات') && (course.title.includes('رياضيات') || course.tags.includes('رياضيات'))) ||
+                (subject.includes('عربية') && (course.title.includes('العربية') || course.tags.includes('لغة عربية'))) ||
+                (subject.includes('إنجليزية') && (course.title.includes('الإنجليزية') || course.tags.includes('لغة إنجليزية')));
             const matchLevel = level === 'كل المستويات' || course.level === level;
             const matchPrice = course.price <= maxPrice;
             const matchRating = course.rating >= minRating;
@@ -68,14 +74,7 @@ export const CoursesPage = () => {
 
     const handleCategoryChange = (cat) => {
         setCategory(cat);
-        if (cat === 'مناهج دراسية') {
-            setSubject(subjectChips[0]);
-        } else if (cat !== categories[0]) {
-            setGrade(gradeChips[0]);
-        }
     };
-
-    const isAcademic = category === 'مناهج دراسية';
 
     return (
         <div className="page-fade">
@@ -85,10 +84,10 @@ export const CoursesPage = () => {
                 <div className="container">
                     <div className="section-head">
                         <div className="section-head-left">
-                            <div className="eyebrow">مسارات تعليمية ومهارية متميزة</div>
-                            <h1 className="section-title page-title">تعلّم بوضوح، مع أفضل المعلمين.</h1>
+                            <div className="eyebrow">مناهج ومسارات الثانوية والإعدادية المعتمدة</div>
+                            <h1 className="section-title page-title">تعلّم بوضوح، مع نخبة من كبار المعلمين.</h1>
                             <p className="section-subtitle">
-                                مناهج دراسية معتمدة ومسارات رقمية حديثة، في تجربة واحدة هادئة ومنظمة.
+                                شروحات تفصيلية، حل بنوك الأسئلة والامتحانات السابقة لمراحل الثانوية والإعدادية والبكالوريا المصرية.
                             </p>
                         </div>
                         <div className="small muted">
@@ -97,7 +96,7 @@ export const CoursesPage = () => {
                     </div>
 
                     {/* Primary Category Tabs */}
-                    <div className="filter-row course-filters" style={{ marginBottom: 14 }}>
+                    <div className="filter-row course-filters" style={{ marginBottom: 16 }}>
                         <div className="filter-scroll">
                             {categories.map((item) => (
                                 <button
@@ -116,7 +115,7 @@ export const CoursesPage = () => {
                             <input
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
-                                placeholder="ابحث عن مادة أو مهارة أو مدرس..."
+                                placeholder="ابحث عن مادة، صف دراسي، أو معلّم..."
                             />
                         </label>
 
@@ -129,40 +128,39 @@ export const CoursesPage = () => {
                         </button>
                     </div>
 
-                    {/* Sub-Filters: Show Grades for School Curriculum, or Subjects for general */}
-                    {isAcademic ? (
-                        <div className="grade-chips" style={{ marginTop: 0, marginBottom: 24 }}>
-                            <span>
-                                <GraduationCap size={15} /> الصف الدراسي
-                            </span>
-                            {gradeChips.map((item) => (
-                                <button
-                                    type="button"
-                                    className={grade === item ? 'active' : ''}
-                                    key={item}
-                                    onClick={() => setGrade(item)}
-                                >
-                                    {item}
-                                </button>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="subject-chips" style={{ marginTop: 0, marginBottom: 24 }}>
-                            <span>
-                                <Sparkles size={14} /> التخصص
-                            </span>
-                            {subjectChips.map((item) => (
-                                <button
-                                    type="button"
-                                    className={subject === item ? 'active' : ''}
-                                    key={item}
-                                    onClick={() => setSubject(item)}
-                                >
-                                    {item}
-                                </button>
-                            ))}
-                        </div>
-                    )}
+                    {/* Grade Chips Filter */}
+                    <div className="grade-chips" style={{ marginTop: 0, marginBottom: 12 }}>
+                        <span>
+                            <GraduationCap size={15} /> الصف الدراسي:
+                        </span>
+                        {gradeChips.map((item) => (
+                            <button
+                                type="button"
+                                className={grade === item ? 'active' : ''}
+                                key={item}
+                                onClick={() => setGrade(item)}
+                            >
+                                {item}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Subject Chips Filter */}
+                    <div className="subject-chips" style={{ marginTop: 0, marginBottom: 28 }}>
+                        <span>
+                            <Sparkles size={14} /> المادة الدراسية:
+                        </span>
+                        {subjectChips.map((item) => (
+                            <button
+                                type="button"
+                                className={subject === item ? 'active' : ''}
+                                key={item}
+                                onClick={() => setSubject(item)}
+                            >
+                                {item}
+                            </button>
+                        ))}
+                    </div>
 
                     {/* Advanced Filters Panel */}
                     {filtersOpen && (
