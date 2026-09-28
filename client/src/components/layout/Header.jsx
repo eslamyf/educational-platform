@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Search, ShoppingBag, UserRound, LogOut, Menu, X } from 'lucide-react';
+import { Search, UserRound, LogOut, Menu, X } from 'lucide-react';
 import { Logo } from '@/components/common/Logo';
 import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { SearchModal } from '@/components/common/SearchModal';
-import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
 import { navItems } from '@/lib/data';
 
@@ -12,7 +11,6 @@ export const Header = () => {
     const [path] = useLocation();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
-    const { itemCount } = useCart();
     const { isAuthenticated, role, user, logout } = useAuth();
 
     return (
@@ -80,14 +78,8 @@ export const Header = () => {
                         )}
                     </div>
 
-                    {/* Left Side: Dual Action Buttons / Logged in state + Cart + Mobile Toggle */}
+                    {/* Left Side: Dual Action Buttons / Logged in state + Mobile Toggle */}
                     <div className="pill-nav-left">
-                        {/* Cart Icon Button */}
-                        <Link href="/cart" className="pill-icon-btn cart-relative" aria-label="سلة الشراء" title="سلة الشراء">
-                            <ShoppingBag size={18} />
-                            {itemCount > 0 && <span className="pill-cart-count">{itemCount.toLocaleString('ar-EG')}</span>}
-                        </Link>
-
                         {isAuthenticated ? (
                             <>
                                 {/* Logged-in User Profile Link */}
