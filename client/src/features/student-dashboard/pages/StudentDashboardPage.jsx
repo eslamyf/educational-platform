@@ -297,7 +297,7 @@ export const StudentDashboardPage = () => {
                             {enrolled.slice(0, 2).map((item, index) => {
                                 const currentProgress = index === 0 ? progressPercent : 45;
                                 return (
-                                    <article className="student-course-card" key={item.id}>
+                                    <Link href={`/learn/${item.id}`} className="student-course-card" key={item.id}>
                                         <div className="student-course-image">
                                             <img src={item.image} alt={item.title} />
                                             <span>{index === 0 ? 'قيد التعلّم النشط' : 'مستمر'}</span>
@@ -318,12 +318,12 @@ export const StudentDashboardPage = () => {
                                             </div>
                                             <div className="student-course-bottom">
                                                 <small>{Math.round((item.lessons * currentProgress) / 100)} من {item.lessons} محاضرة</small>
-                                                <Link href={`/learn/${item.id}`} className="btn btn-primary btn-small">
+                                                <span className="btn-dashboard-resume">
                                                     متابعة التعلّم <ArrowLeft size={13} />
-                                                </Link>
+                                                </span>
                                             </div>
                                         </div>
-                                    </article>
+                                    </Link>
                                 );
                             })}
                         </div>
@@ -380,7 +380,7 @@ export const StudentDashboardPage = () => {
                             const progressMap = [75, 45, 30, 90];
                             const currentProgress = progressMap[index % progressMap.length];
                             return (
-                                <article className="student-course-card" key={item.id}>
+                                <Link href={`/learn/${item.id}`} className="student-course-card" key={item.id}>
                                     <div className="student-course-image">
                                         <img src={item.image} alt={item.title} />
                                         <span>{currentProgress >= 90 ? 'مكتمل تقريبًا' : 'قيد الدراسة'}</span>
@@ -401,12 +401,12 @@ export const StudentDashboardPage = () => {
                                         </div>
                                         <div className="student-course-bottom">
                                             <small>{Math.round((item.lessons * currentProgress) / 100)} من {item.lessons} محاضرة ({currentProgress}٪)</small>
-                                            <Link href={`/learn/${item.id}`} className="btn btn-primary btn-small">
+                                            <span className="btn-dashboard-resume">
                                                 متابعة المحاضرة <ArrowLeft size={13} />
-                                            </Link>
+                                            </span>
                                         </div>
                                     </div>
-                                </article>
+                                </Link>
                             );
                         })}
                     </div>

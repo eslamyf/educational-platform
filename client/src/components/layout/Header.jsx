@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
 import { Search, UserRound, LogOut, Menu, X } from 'lucide-react';
 import { Logo } from '@/components/common/Logo';
@@ -11,7 +11,22 @@ export const Header = () => {
     const [path] = useLocation();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
+    const [scrollProgress, setScrollProgress] = useState(0);
     const { isAuthenticated, role, user, logout } = useAuth();
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const totalScroll = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            if (totalScroll > 0) {
+                const currentProgress = (window.scrollY / totalScroll) * 100;
+                setScrollProgress(Math.min(100, Math.max(0, currentProgress)));
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll();
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     return (
         <>
@@ -130,6 +145,14 @@ export const Header = () => {
                         </button>
                     </div>
                 </nav>
+
+                {/* Progress bar directly underneath the pill navbar */}
+                <div className="pill-scroll-track" aria-hidden="true">
+                    <div
+                        className="pill-scroll-bar"
+                        style={{ width: `${scrollProgress}%` }}
+                    />
+                </div>
             </header>
 
             <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />

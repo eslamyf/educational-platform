@@ -1,34 +1,169 @@
 import React, { useState, useMemo } from 'react';
-import { Search, GraduationCap, Sparkles, ArrowUpDown, RotateCcw, X, BookOpen } from 'lucide-react';
+import { Search, GraduationCap, Sparkles, ArrowUpDown, RotateCcw, X, BookOpen, Layers } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { CourseCard } from '@/features/catalog/components/CourseCard';
 import { EmptyState } from '@/components/common/EmptyState';
-import { courses, categories, gradeChips, subjectChips } from '@/lib/data';
+import { courses, categories } from '@/lib/data';
+
+const TRACK_FILTER_MAP = {
+    'كل المناهج والمسارات': {
+        grades: [
+            'كل الصفوف',
+            'الصف الثالث الثانوي',
+            'الصف الثاني الثانوي',
+            'الصف الأول الثانوي',
+            'الصف الأول بالبكالوريا (تمهيدي)',
+            'الصف الثاني بالبكالوريا',
+            'الصف الثالث بالبكالوريا (تخرج)',
+        ],
+        subjects: [
+            'كل المواد والمسارات',
+            'أحياء وجيولوجيا',
+            'فيزياء',
+            'كيمياء',
+            'رياضيات وتفاضل',
+            'لغة عربية وبلاغة',
+            'لغة إنجليزية',
+            'مسار الطب وعلوم الحياة (بكالوريا)',
+            'مسار الهندسة وتكنولوجيا المعلومات (بكالوريا)',
+            'مسار إدارة الأعمال والاقتصاد (بكالوريا)',
+            'مسار الآداب والعلوم الإنسانية (بكالوريا)',
+        ],
+    },
+    'الثانوية العامة (علمي علوم)': {
+        grades: [
+            'كل صفوف علمي علوم',
+            'الصف الثالث الثانوي',
+            'الصف الثاني الثانوي',
+        ],
+        subjects: [
+            'كل مواد علمي علوم',
+            'أحياء وبيولوجيا',
+            'جيولوجيا وعلوم البيئة',
+            'كيمياء',
+            'فيزياء',
+            'لغة عربية وبلاغة',
+            'لغة إنجليزية',
+        ],
+    },
+    'الثانوية العامة (علمي رياضة)': {
+        grades: [
+            'كل صفوف علمي رياضة',
+            'الصف الثالث الثانوي',
+            'الصف الثاني الثانوي',
+        ],
+        subjects: [
+            'كل مواد علمي رياضة',
+            'رياضيات وتفاضل وتكامل',
+            'فيزياء وفيزياء حديثة',
+            'كيمياء',
+            'لغة عربية',
+            'لغة إنجليزية',
+        ],
+    },
+    'الثانوية العامة (أدبي)': {
+        grades: [
+            'كل صفوف الأدبي والعام',
+            'الصف الثالث الثانوي',
+            'الصف الثاني الثانوي',
+            'الصف الأول الثانوي',
+        ],
+        subjects: [
+            'كل مواد أدبي',
+            'لغة عربية وبلاغة',
+            'لغة إنجليزية',
+        ],
+    },
+    'البكالوريا المصرية': {
+        grades: [
+            'كل صفوف البكالوريا',
+            'الصف الأول بالبكالوريا (تمهيدي)',
+            'الصف الثاني بالبكالوريا',
+            'الصف الثالث بالبكالوريا (تخرج)',
+        ],
+        subjects: [
+            'كل مسارات البكالوريا',
+            'مسار الطب وعلوم الحياة',
+            'مسار الهندسة وتكنولوجيا المعلومات',
+            'مسار إدارة الأعمال والاقتصاد',
+            'مسار الآداب والعلوم الإنسانية والفنون',
+        ],
+    },
+};
 
 export const CoursesPage = () => {
     const [category, setCategory] = useState(categories[0]);
-    const [grade, setGrade] = useState(gradeChips[0]);
-    const [subject, setSubject] = useState(subjectChips[0]);
+
+    // Derived available grades & subjects for current track
+    const currentTrackConfig = TRACK_FILTER_MAP[category] || TRACK_FILTER_MAP['كل المناهج والمسارات'];
+    const availableGrades = currentTrackConfig.grades;
+    const availableSubjects = currentTrackConfig.subjects;
+
+    const [grade, setGrade] = useState(availableGrades[0]);
+    const [subject, setSubject] = useState(availableSubjects[0]);
     const [query, setQuery] = useState('');
     const [sort, setSort] = useState('الأكثر صلة');
 
+    // Handle track switch with automatic cascading reset of grade & subject
+    const handleTrackChange = (newTrack) => {
+        setCategory(newTrack);
+        const config = TRACK_FILTER_MAP[newTrack] || TRACK_FILTER_MAP['كل المناهج والمسارات'];
+        setGrade(config.grades[0]);
+        setSubject(config.subjects[0]);
+    };
+
     const filteredCourses = useMemo(() => {
         const result = courses.filter((course) => {
-            const matchCategory = category === categories[0] || course.category === category;
-            const matchGrade = grade === gradeChips[0] || course.tags.includes(grade) || course.level === grade;
-            const matchSubject = subject === subjectChips[0] ||
-                course.tags.some((tag) => tag.includes(subject) || subject.includes(tag)) ||
-                course.title.includes(subject) ||
-                (subject.includes('أحياء') && (course.title.includes('أحياء') || course.tags.includes('أحياء') || course.tags.includes('جيولوجيا'))) ||
-                (subject.includes('جيولوجيا') && (course.title.includes('جيولوجيا') || course.tags.includes('جيولوجيا'))) ||
-                (subject.includes('فيزياء') && (course.title.includes('فيزياء') || course.tags.includes('فيزياء'))) ||
-                (subject.includes('كيمياء') && (course.title.includes('كيمياء') || course.tags.includes('كيمياء'))) ||
-                (subject.includes('رياضيات') && (course.title.includes('رياضيات') || course.tags.includes('رياضيات'))) ||
-                (subject.includes('عربية') && (course.title.includes('العربية') || course.tags.includes('لغة عربية'))) ||
-                (subject.includes('إنجليزية') && (course.title.includes('الإنجليزية') || course.tags.includes('لغة إنجليزية'))) ||
-                (subject.includes('الطب') && (course.title.includes('الطب') || course.tags.includes('علوم الحياة') || course.category.includes('البكالوريا')));
+            // Track match
+            let matchCategory = true;
+            if (category === 'الثانوية العامة (علمي علوم)') {
+                matchCategory = course.tags.includes('علمي علوم') || course.track?.includes('علمي علوم') || course.category.includes('علمي علوم');
+            } else if (category === 'الثانوية العامة (علمي رياضة)') {
+                matchCategory = course.tags.includes('علمي رياضة') || course.track?.includes('علمي رياضة') || course.category.includes('علمي رياضة');
+            } else if (category === 'الثانوية العامة (أدبي)') {
+                matchCategory = course.tags.includes('أدبي') || course.tags.includes('ثانوي عام') || course.category.includes('أدبي');
+            } else if (category === 'البكالوريا المصرية') {
+                matchCategory = course.category.includes('البكالوريا') || course.tags.includes('البكالوريا المصرية');
+            }
 
+            // Grade match
+            const isAllGrades = grade.startsWith('كل');
+            let matchGrade = isAllGrades;
+            if (!isAllGrades) {
+                matchGrade = course.tags.includes(grade) || course.level === grade || course.level?.includes(grade) || grade.includes(course.level);
+            }
+
+            // Subject match
+            const isAllSubjects = subject.startsWith('كل');
+            let matchSubject = isAllSubjects;
+            if (!isAllSubjects) {
+                if (subject.includes('أحياء')) {
+                    matchSubject = (course.tags.includes('أحياء') || course.title.includes('أحياء')) && !course.tags.includes('علمي رياضة');
+                } else if (subject.includes('جيولوجيا')) {
+                    matchSubject = course.tags.includes('جيولوجيا') || course.title.includes('جيولوجيا');
+                } else if (subject.includes('فيزياء')) {
+                    matchSubject = course.tags.includes('فيزياء') || course.title.includes('فيزياء');
+                } else if (subject.includes('كيمياء')) {
+                    matchSubject = course.tags.includes('كيمياء') || course.title.includes('كيمياء');
+                } else if (subject.includes('رياضيات') || subject.includes('تفاضل')) {
+                    matchSubject = course.tags.includes('رياضيات') || course.title.includes('رياضيات') || course.tags.includes('تفاضل');
+                } else if (subject.includes('عربية')) {
+                    matchSubject = course.tags.includes('عربية') || course.tags.includes('لغة عربية') || course.title.includes('العربية');
+                } else if (subject.includes('إنجليزية')) {
+                    matchSubject = course.tags.includes('إنجليزية') || course.tags.includes('لغة إنجليزية') || course.title.includes('الإنجليزية');
+                } else if (subject.includes('الطب')) {
+                    matchSubject = course.tags.includes('مسار الطب وعلوم الحياة') || course.id === 'baccalaureate-medical';
+                } else if (subject.includes('الهندسة')) {
+                    matchSubject = course.tags.includes('مسار الهندسة وتكنولوجيا المعلومات') || course.id === 'baccalaureate-engineering';
+                } else if (subject.includes('الأعمال') || subject.includes('اقتصاد')) {
+                    matchSubject = course.tags.includes('مسار إدارة الأعمال والاقتصاد') || course.id === 'baccalaureate-business';
+                } else if (subject.includes('الآداب') || subject.includes('الإنسانية') || subject.includes('فنون')) {
+                    matchSubject = course.tags.includes('مسار الآداب والعلوم الإنسانية والفنون') || course.id === 'baccalaureate-arts';
+                }
+            }
+
+            // Search query match
             const matchQuery = !query ||
                 `${course.title} ${course.shortTitle} ${course.description} ${course.category} ${course.tags.join(' ')} ${course.instructor}`
                     .toLowerCase()
@@ -50,12 +185,12 @@ export const CoursesPage = () => {
         });
     }, [category, grade, subject, query, sort]);
 
-    const isFiltered = category !== categories[0] || grade !== gradeChips[0] || subject !== subjectChips[0] || query !== '' || sort !== 'الأكثر صلة';
+    const isFiltered = category !== categories[0] || !grade.startsWith('كل') || !subject.startsWith('كل') || query !== '' || sort !== 'الأكثر صلة';
 
     const resetFilters = () => {
         setCategory(categories[0]);
-        setGrade(gradeChips[0]);
-        setSubject(subjectChips[0]);
+        setGrade(TRACK_FILTER_MAP['كل المناهج والمسارات'].grades[0]);
+        setSubject(TRACK_FILTER_MAP['كل المناهج والمسارات'].subjects[0]);
         setQuery('');
         setSort('الأكثر صلة');
     };
@@ -80,9 +215,9 @@ export const CoursesPage = () => {
                         </div>
                     </div>
 
-                    {/* Unified Single Filter Card */}
+                    {/* Smart Cascading Unified Filter Card */}
                     <div className="unified-filter-card">
-                        {/* Top: Track Pills + Integrated Search */}
+                        {/* Step 1: Track / Stage Selection */}
                         <div className="unified-filter-top">
                             <div className="unified-track-chips">
                                 {categories.map((item) => (
@@ -90,7 +225,7 @@ export const CoursesPage = () => {
                                         type="button"
                                         className={`track-chip-btn ${category === item ? 'active' : ''}`}
                                         key={item}
-                                        onClick={() => setCategory(item)}
+                                        onClick={() => handleTrackChange(item)}
                                     >
                                         {item}
                                     </button>
@@ -117,14 +252,14 @@ export const CoursesPage = () => {
                             </label>
                         </div>
 
-                        {/* Bottom: Inline Dropdowns + Reset */}
+                        {/* Step 2 & 3: Cascading Grade & Subject Dropdowns */}
                         <div className="unified-filter-bottom">
                             <div className="unified-selects-group">
                                 <div className="unified-filter-select">
                                     <GraduationCap size={15} color="var(--olive-dark)" />
-                                    <label>الصف:</label>
+                                    <label>الصف الدراسي:</label>
                                     <select value={grade} onChange={(e) => setGrade(e.target.value)}>
-                                        {gradeChips.map((item) => (
+                                        {availableGrades.map((item) => (
                                             <option key={item} value={item}>{item}</option>
                                         ))}
                                     </select>
@@ -132,9 +267,9 @@ export const CoursesPage = () => {
 
                                 <div className="unified-filter-select">
                                     <Sparkles size={14} color="var(--coral-dark)" />
-                                    <label>المادة:</label>
+                                    <label>المادة المقررة:</label>
                                     <select value={subject} onChange={(e) => setSubject(e.target.value)}>
-                                        {subjectChips.map((item) => (
+                                        {availableSubjects.map((item) => (
                                             <option key={item} value={item}>{item}</option>
                                         ))}
                                     </select>

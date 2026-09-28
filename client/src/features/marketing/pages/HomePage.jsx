@@ -176,7 +176,7 @@ export const HomePage = () => {
                                         }
                                     }}
                                 >
-                                    <span>كيف تعمل نَوَى؟</span>
+                                    <span>كيفية الاشتراك في الكورس</span>
                                 </a>
                             </div>
                         </div>
