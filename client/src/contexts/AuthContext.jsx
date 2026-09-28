@@ -6,9 +6,9 @@ const defaultStudentProfile = {
     email: 'sara@example.com',
     phone: '01012345678',
     governorate: 'القاهرة',
-    stage: 'المرحلة الإعدادية',
-    grade: 'الصف الثالث الإعدادي',
-    track: 'إعدادي عام',
+    stage: 'الثانوية العامة',
+    grade: 'الصف الثالث الثانوي',
+    track: 'علمي علوم',
     guardian: '01098765432',
     nationalId: '30401011234567',
 };
@@ -26,14 +26,11 @@ const normalizeProfile = (profile, role = 'student') => {
     if (!profile) return role === 'instructor' ? defaultInstructorProfile : defaultStudentProfile;
     const defaults = role === 'instructor' ? defaultInstructorProfile : defaultStudentProfile;
     let stage = profile.stage || defaults.stage;
-    if (stage === 'إعدادي') stage = 'المرحلة الإعدادية';
-    if (stage === 'ثانوي') stage = 'الثانوية العامة';
+    if (stage === 'ثانوي' || stage === 'المرحلة الإعدادية' || stage === 'إعدادي') stage = 'الثانوية العامة';
     if (stage === 'بكالوريا') stage = 'البكالوريا المصرية';
 
     let grade = profile.grade || defaults.grade;
-    if (grade === 'أولى إعدادي') grade = 'الصف الأول الإعدادي';
-    if (grade === 'تانية إعدادي') grade = 'الصف الثاني الإعدادي';
-    if (grade === 'تالتة إعدادي') grade = 'الصف الثالث الإعدادي';
+    if (grade.includes('إعدادي')) grade = 'الصف الثالث الثانوي';
     if (grade === 'أولى ثانوي') grade = 'الصف الأول الثانوي';
     if (grade === 'تانية ثانوي') grade = 'الصف الثاني الثانوي';
     if (grade === 'تالتة ثانوي') grade = 'الصف الثالث الثانوي';

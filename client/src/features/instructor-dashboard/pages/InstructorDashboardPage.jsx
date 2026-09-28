@@ -58,7 +58,7 @@ export const InstructorDashboardPage = () => {
         { name: 'سارة أحمد', course: 'استراتيجية المحتوى', progress: 72, time: 'منذ ساعتين' },
         { name: 'محمد علي', course: 'الأحياء — الصف الثالث الثانوي', progress: 58, time: 'منذ ٤ ساعات' },
         { name: 'نورهان مصطفى', course: 'الرياضيات — الصف الثاني الثانوي', progress: 84, time: 'أمس' },
-        { name: 'كريم محمود', course: 'اللغة العربية — الصف الثالث الإعدادي', progress: 45, time: 'منذ يومين' },
+        { name: 'كريم محمود', course: 'مسار الطب وعلوم الحياة — البكالوريا المصرية', progress: 45, time: 'منذ يومين' },
     ];
     return (<PortalLayout activeTab="overview" role="instructor">
       {/* Top Heading */}

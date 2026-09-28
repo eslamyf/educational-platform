@@ -423,7 +423,7 @@ export const StudentDashboardPage = () => {
                             <div className="eyebrow">تقييم الفهم والمتابعة الدورية</div>
                             <h1 className="display">الاختبارات والواجبات المدرسية</h1>
                             <p className="muted">
-                                بنك الأسئلة والامتحانات التفاعلية بنمط ورقة امتحانات الثانوية العامة والإعدادية، مع إمكانية تحميل شيتات الواجب بصيغة PDF.
+                                بنك الأسئلة والامتحانات التفاعلية بنمط ورقة امتحانات الثانوية العامة والبكالوريا المصرية، مع إمكانية تحميل شيتات الواجب بصيغة PDF.
                             </p>
                         </div>
                     </div>
@@ -647,98 +647,157 @@ export const StudentDashboardPage = () => {
             )}
 
             {/* =========================================================
-                TAB 4: بياناتي والمرحلة (PROFILE & STAGE)
+            {/* =========================================================
+                TAB 4: بياناتي والمرحلة (PROFILE & STAGE - LOCKED)
                 ========================================================= */}
             {activeTab === 'profile' && (
                 <div className="tab-content-fade">
                     <div className="profile-heading">
                         <div>
                             <div className="eyebrow">مساحتك وملفك الشخصي</div>
-                            <h1 className="display">بياناتي والمرحلة الدراسية</h1>
+                            <h1 className="display">بيانات الطالب والمرحلة التعليمية</h1>
                             <p className="muted">
-                                حدد مرحلتك الدراسية وصفك لضبط مقترحات الدروس والاختبارات على قياسك.
+                                بطاقة بياناتك الرسمية المسجلة والمعتمدة في منصة نَوَى لتأمين المحاضرات وتوثيق الاختبارات.
                             </p>
                         </div>
-                        <div className="profile-avatar">{(profileData.name || 'س')[0]}</div>
+                        <div className="profile-avatar">{(user?.name || 'اسلام')[0]}</div>
                     </div>
 
-                    <form className="profile-card" onSubmit={handleProfileSubmit}>
+                    {/* Official Locked Verification Banner */}
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 14,
+                            padding: '16px 20px',
+                            borderRadius: 16,
+                            background: 'rgba(216, 110, 77, 0.08)',
+                            border: '1px solid rgba(216, 110, 77, 0.25)',
+                            marginBottom: 24,
+                        }}
+                    >
+                        <div
+                            style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 10,
+                                background: '#fae6dc',
+                                color: 'var(--coral-dark)',
+                                display: 'grid',
+                                placeItems: 'center',
+                                flex: 'none',
+                            }}
+                        >
+                            <Lock size={20} />
+                        </div>
+                        <div>
+                            <strong style={{ display: 'block', fontSize: '0.88rem', color: 'var(--ink)', marginBottom: 2 }}>
+                                بيانات الحساب موثقة ومقفلة ضد التعديل المباشر
+                            </strong>
+                            <span style={{ fontSize: '0.74rem', color: 'var(--muted)', lineHeight: 1.6 }}>
+                                لحماية حسابك وتوثيق الشهادات ومنع مشاركة الحسابات، لا يمكن تعديل الاسم أو الرقم القومي أو المرحلة يدويًا. للتعديل، يرجى مراسلة الدعم الفني.
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="profile-card">
                         <div className="profile-card-head">
                             <div>
-                                <h2>البيانات الشخصية</h2>
-                                <p>الاسم والرقم القومي للتأمين ومنع تسريب المحاضرات.</p>
+                                <h2>البيانات الأساسية</h2>
+                                <p>معلومات التواصل والتسجيل الرسمي.</p>
                             </div>
+                            <span className="profile-saved profile-saved-active" style={{ color: '#16a34a', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.76rem', fontWeight: 700 }}>
+                                <ShieldCheck size={16} /> حساب موثق ومعتمد
+                            </span>
                         </div>
 
                         <div className="profile-grid">
                             <label>
                                 الاسم بالكامل
-                                <input
-                                    value={profileData.name}
-                                    onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                                    required
-                                />
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        value={user?.name || 'اسلام ياسر'}
+                                        readOnly
+                                        disabled
+                                        style={{ background: 'var(--paper-deep)', cursor: 'not-allowed', color: 'var(--ink)', fontWeight: 600, paddingLeft: 36 }}
+                                    />
+                                    <Lock size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                                </div>
                             </label>
 
                             <label>
                                 البريد الإلكتروني
-                                <input
-                                    type="email"
-                                    value={profileData.email}
-                                    onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-                                    required
-                                />
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        value={user?.email || 'eslam@example.com'}
+                                        readOnly
+                                        disabled
+                                        style={{ background: 'var(--paper-deep)', cursor: 'not-allowed', color: 'var(--ink)', fontWeight: 600, paddingLeft: 36 }}
+                                    />
+                                    <Lock size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                                </div>
                             </label>
 
                             <label>
-                                رقم الهاتف
-                                <input
-                                    value={profileData.phone}
-                                    onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-                                    placeholder="01X XXX XXXX"
-                                />
+                                رقم الهاتف المسجل
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        value={user?.phone || '01028103634'}
+                                        readOnly
+                                        disabled
+                                        style={{ background: 'var(--paper-deep)', cursor: 'not-allowed', color: 'var(--ink)', fontWeight: 600, paddingLeft: 36 }}
+                                    />
+                                    <Lock size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                                </div>
                             </label>
 
                             <label>
-                                الرقم القومي
-                                <input
-                                    value={profileData.nationalId}
-                                    onChange={(e) => setProfileData({ ...profileData, nationalId: e.target.value })}
-                                    placeholder="١٤ رقمًا"
-                                    required
-                                />
+                                المحافظة
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        value={user?.governorate || 'القاهرة'}
+                                        readOnly
+                                        disabled
+                                        style={{ background: 'var(--paper-deep)', cursor: 'not-allowed', color: 'var(--ink)', fontWeight: 600, paddingLeft: 36 }}
+                                    />
+                                    <Lock size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                                </div>
                             </label>
                         </div>
 
                         <div className="profile-card-head profile-study-head">
                             <div>
-                                <h2>النظام والمرحلة التعليمية في مصر</h2>
-                                <p>اختر نظامك الدراسي، وستتحدّث المقترحات التلقائية.</p>
+                                <h2>النظام والمرحلة التعليمية المعتمدة</h2>
+                                <p>النظام الدراسي والصف المخصص لحسابك.</p>
                             </div>
                         </div>
 
                         <div className="stage-choice profile-stage-choice">
                             {egyptEducationOptions.stages.map((stg) => {
                                 const info = egyptEducationOptions.stageMap[stg];
-                                const isActive = profileData.stage === stg;
+                                const currentStage = user?.stage || 'البكالوريا المصرية';
+                                const isActive = currentStage === stg;
                                 return (
-                                    <button
+                                    <div
                                         key={stg}
-                                        type="button"
                                         className={isActive ? 'active' : ''}
-                                        onClick={() => {
-                                            const stageInfo = egyptEducationOptions.stageMap[stg];
-                                            setProfileData({
-                                                ...profileData,
-                                                stage: stg,
-                                                grade: stageInfo.grades[0],
-                                                track: stageInfo.tracks[0],
-                                            });
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: 4,
+                                            padding: 14,
+                                            borderRadius: 14,
+                                            border: isActive ? '2px solid var(--coral)' : '1px solid var(--line)',
+                                            background: isActive ? '#fff7f2' : 'var(--paper-deep)',
+                                            opacity: isActive ? 1 : 0.6,
+                                            cursor: 'not-allowed',
                                         }}
                                     >
-                                        <span>{info.label}</span>
-                                        <small>{info.description}</small>
-                                    </button>
+                                        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: isActive ? 'var(--coral-dark)' : 'var(--ink)' }}>
+                                            {info.label} {isActive && '✓ (المسار الحالي)'}
+                                        </span>
+                                        <small style={{ color: 'var(--muted)', fontSize: '0.68rem' }}>{info.description}</small>
+                                    </div>
                                 );
                             })}
                         </div>
@@ -746,42 +805,79 @@ export const StudentDashboardPage = () => {
                         <div className="profile-grid">
                             <label>
                                 الصف الدراسي
-                                <select
-                                    value={profileData.grade}
-                                    onChange={(e) => setProfileData({ ...profileData, grade: e.target.value })}
-                                >
-                                    {(egyptEducationOptions.stageMap[profileData.stage]?.grades || []).map((item) => (
-                                        <option key={item}>{item}</option>
-                                    ))}
-                                </select>
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        value={user?.grade || 'الصف الثاني بالبكالوريا'}
+                                        readOnly
+                                        disabled
+                                        style={{ background: 'var(--paper-deep)', cursor: 'not-allowed', color: 'var(--ink)', fontWeight: 600, paddingLeft: 36 }}
+                                    />
+                                    <Lock size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                                </div>
                             </label>
 
                             <label>
                                 الشعبة / المسار
-                                <select
-                                    value={profileData.track}
-                                    onChange={(e) => setProfileData({ ...profileData, track: e.target.value })}
-                                >
-                                    {(egyptEducationOptions.stageMap[profileData.stage]?.tracks || []).map((item) => (
-                                        <option key={item}>{item}</option>
-                                    ))}
-                                </select>
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        value={user?.track || 'علمي علوم'}
+                                        readOnly
+                                        disabled
+                                        style={{ background: 'var(--paper-deep)', cursor: 'not-allowed', color: 'var(--ink)', fontWeight: 600, paddingLeft: 36 }}
+                                    />
+                                    <Lock size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                                </div>
                             </label>
                         </div>
 
-                        <div className="profile-actions">
+                        <div className="profile-grid">
+                            <label>
+                                رقم هاتف ولي الأمر
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        value={user?.guardian || '01090766432'}
+                                        readOnly
+                                        disabled
+                                        style={{ background: 'var(--paper-deep)', cursor: 'not-allowed', color: 'var(--ink)', fontWeight: 600, paddingLeft: 36 }}
+                                    />
+                                    <Lock size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                                </div>
+                            </label>
+
+                            <label>
+                                الرقم القومي (موثق)
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        value={user?.nationalId || '30401011234567'}
+                                        readOnly
+                                        disabled
+                                        style={{ background: 'var(--paper-deep)', cursor: 'not-allowed', color: 'var(--ink)', fontWeight: 600, paddingLeft: 36 }}
+                                    />
+                                    <Lock size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                                </div>
+                            </label>
+                        </div>
+
+                        <div className="profile-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
+                            <a
+                                href="https://wa.me/201028103634?text=%D9%85%D8%B1%D8%AD%D8%A8%D9%8B%D8%A7%D8%8C%20%D8%A3%D8%B1%D8%BA%D8%A8%20%D9%81%D9%8A%20%D8%AA%D8%B9%D8%AF%D9%8A%D9%84%20%D8%A8%D9%8A%D8%A7%D9%86%D8%A7%D8%AA%D9%8A%20%D8%B9%D9%84%D9%89%20%D9%85%D9%86%D8%B5%D8%A9%20%D9%86%D9%8E%D9%88%D9%8E%D9%89"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn btn-outline"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: '0.82rem' }}
+                            >
+                                <AlertCircle size={15} /> طلب تعديل البيانات عبر الدعم الفني
+                            </a>
+
                             <button
                                 type="button"
-                                className="btn btn-secondary"
+                                className="btn btn-primary"
                                 onClick={() => handleTabChange('overview')}
                             >
-                                إلغاء والعودة
-                            </button>
-                            <button className="btn btn-primary" type="submit">
-                                حفظ التغييرات <Check size={15} />
+                                العودة إلى نظرة عامة <ArrowLeft size={15} />
                             </button>
                         </div>
-                    </form>
+                    </div>
                 </div>
             )}
         </PortalLayout>

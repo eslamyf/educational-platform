@@ -15,14 +15,10 @@ export const WelcomePage = () => {
         return <PortalGate />;
     }
     // Recommendations filtered by student's stage & track
-    const isPrep = user.stage?.includes('إعدادي');
     const isBaccalaureate = user.stage?.includes('بكالوريا');
 
     const baseRecommendations = courses.filter((course) => {
         const tags = course.tags.join(' ');
-        if (isPrep) {
-            return course.category === 'مناهج دراسية' && tags.includes('إعدادي');
-        }
         if (isBaccalaureate) {
             if (user.track?.includes('الطب')) return tags.includes('أحياء') || tags.includes('علوم');
             if (user.track?.includes('الهندسة')) return tags.includes('رياضيات') || tags.includes('برمجة');

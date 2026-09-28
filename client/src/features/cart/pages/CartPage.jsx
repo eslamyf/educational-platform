@@ -109,7 +109,7 @@ export const CartPage = () => {
                   </div>
                 </div>
               </aside>
-            </div>) : (<EmptyState icon={ShoppingBag} title="سلتك خفيفة الآن" description="لم تضف أي مسار بعد. اختر من مسارات الإعدادي أو الثانوي أو المهارات العملية وابدأ الآن." actionText="تصفح الكورسات والمسارات" actionHref="/courses"/>)}
+            </div>) : (<EmptyState icon={ShoppingBag} title="سلتك خفيفة الآن" description="لم تضف أي مسار بعد. اختر من مسارات الثانوية العامة أو البكالوريا المصرية وابدأ الآن." actionText="تصفح الكورسات والمسارات" actionHref="/courses"/>)}
         </div>
       </main>
 

@@ -17,9 +17,9 @@ export const LoginPage = () => {
         email: '',
         phone: '',
         governorate: 'القاهرة',
-        stage: 'المرحلة الإعدادية',
-        grade: 'الصف الثالث الإعدادي',
-        track: 'إعدادي عام',
+        stage: 'الثانوية العامة',
+        grade: 'الصف الثالث الثانوي',
+        track: 'علمي علوم',
         guardian: '',
         nationalId: '',
     });
@@ -29,7 +29,7 @@ export const LoginPage = () => {
 
     const currentStageKey = egyptEducationOptions.stages.includes(profile.stage)
         ? profile.stage
-        : 'المرحلة الإعدادية';
+        : 'الثانوية العامة';
     const currentStageInfo = egyptEducationOptions.stageMap[currentStageKey];
     const gradeOptions = currentStageInfo.grades;
     const trackOptions = currentStageInfo.tracks;
@@ -129,7 +129,7 @@ export const LoginPage = () => {
             <em>يبدأ بخطوة.</em>
           </h1>
           <p>
-            من الإعدادي إلى الثانوية والمسارات العملية — مسارات واضحة، شرح قريب، وتقدم تلمسه بنفسك.
+            من الثانوية العامة إلى البكالوريا المصرية — مسارات واضحة، شرح قريب، وتفوق تلمسه بنفسك.
           </p>
           <div className="login-art-mark">
             <BookOpen size={18}/> تعليم مصري بطابع نَوَى
@@ -360,11 +360,9 @@ export const LoginPage = () => {
                       <div className="wizard-hint">
                         <Sparkles size={15}/>
                         <span>
-                          {profile.stage === 'المرحلة الإعدادية'
-                            ? 'ستظهر لك فورًا مواد وتدريبات المرحلة الإعدادية المقررة.'
-                            : profile.stage === 'البكالوريا المصرية'
+                          {profile.stage === 'البكالوريا المصرية'
                             ? 'ستظهر لك مسارات ومواد نظام البكالوريا المصرية وفق التخصص المختار.'
-                            : 'ستظهر لك مواد الثانوية والمسار العلمي أو الأدبي الذي اخترته.'}
+                            : 'ستظهر لك مواد الثانوية العامة والمسار العلمي أو الأدبي الذي اخترته.'}
                         </span>
                       </div>
                     </div>)}

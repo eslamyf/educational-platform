@@ -65,8 +65,8 @@ export const HomePage = () => {
         },
         {
             icon: GraduationCap,
-            title: 'حدد صفك الدراسي أو مجالك',
-            short: 'إعدادي، ثانوي، أو بكالوريا',
+            title: 'حدد شعبتك ومادتك الدراسية',
+            short: 'ثانوي عام، أو بكالوريا مصرية',
             desc: 'اختر مرحلتك ومادتك لتظهر لك أقوى المسارات والمراجعات المصممة لصفك بدقة.',
             actionText: 'اختر مرحلتك',
             actionHref: '/courses',
@@ -112,7 +112,7 @@ export const HomePage = () => {
         {
             icon: ShieldCheck,
             title: 'نخبة من كبار المعلمين',
-            desc: 'اختيار دقيق لأفضل معلّمي ومؤلفي مذكرات الثانوية العامة والإعدادية في مصر.',
+            desc: 'اختيار دقيق لأفضل معلّمي ومؤلفي مذكرات الثانوية العامة والبكالوريا المصرية في مصر.',
             colorClass: 'feature-coral',
         },
         {
@@ -209,12 +209,14 @@ export const HomePage = () => {
                 {/* Why Nawa Feature Highlights */}
                 <section className="section section-features">
                     <div className="container">
-                        <div className="section-head text-center-head">
-                            <div className="eyebrow eyebrow-center">لماذا نَوَى؟</div>
-                            <h2 className="section-title">بيئة تعليمية صُممت لتضمن تفوقك</h2>
-                            <p className="section-subtitle">
-                                نجمع لك أفضل المعلمين، أحدث أساليب الشرح، والتدريب المستمر على أسئلة الامتحانات في مكان واحد.
-                            </p>
+                        <div className="section-head">
+                            <div className="section-head-left">
+                                <div className="eyebrow">لماذا نَوَى؟</div>
+                                <h2 className="section-title">بيئة تعليمية صُممت لتضمن تفوقك</h2>
+                                <p className="section-subtitle">
+                                    نجمع لك أفضل المعلمين، أحدث أساليب الشرح، والتدريب المستمر على أسئلة الامتحانات في مكان واحد.
+                                </p>
+                            </div>
                         </div>
 
                         <div className="features-grid">
