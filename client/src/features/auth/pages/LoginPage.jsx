@@ -3,18 +3,124 @@ import { Link, useLocation } from 'wouter';
 import {
     BookOpen,
     LogIn,
-    ShieldCheck,
     Sparkles,
     ArrowLeft,
     ArrowRight,
     Check,
     CheckCircle2,
-    Home,
     GraduationCap,
+    UserRound,
+    Phone,
+    Mail,
+    Lock,
+    MapPin,
+    CreditCard,
+    Eye,
+    EyeOff,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { egyptEducationOptions } from '@/lib/data';
 import { toast } from 'sonner';
+
+// Reusable Universal Floating Label Field Component with Nawa Brand Identity
+export const FloatingField = ({
+    id,
+    label,
+    icon: Icon,
+    type = 'text',
+    value,
+    onChange,
+    onBlur,
+    placeholderHelper,
+    error,
+    options = [],
+    autoFocus = false,
+    maxLength,
+    required = false,
+    className = '',
+}) => {
+    const [isFocused, setIsFocused] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const hasValue = value !== undefined && value !== null && String(value).trim().length > 0;
+    const isFloated = isFocused || hasValue;
+
+    const inputType = type === 'password' ? (showPassword ? 'text' : 'password') : type;
+
+    return (
+        <div className={`floating-field-wrapper ${className}`}>
+            <div
+                className={`floating-field-box ${isFocused ? 'focused' : ''} ${hasValue ? 'has-value' : ''} ${error ? 'has-error' : ''}`}
+                onClick={() => {
+                    const el = document.getElementById(id);
+                    if (el) el.focus();
+                }}
+            >
+                {/* Floating pill badge / inside label */}
+                <div className={`floating-field-label ${isFloated ? 'floated' : 'inside'}`}>
+                    {Icon && <Icon size={15} className="floating-field-icon" />}
+                    <span>{label}</span>
+                </div>
+
+                {type === 'select' ? (
+                    <select
+                        id={id}
+                        className="floating-field-select"
+                        value={value}
+                        onChange={(e) => onChange(e.target.value)}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={(e) => {
+                            setIsFocused(false);
+                            onBlur?.(e);
+                        }}
+                        autoFocus={autoFocus}
+                    >
+                        {options.map((opt) => (
+                            <option key={opt} value={opt}>
+                                {opt}
+                            </option>
+                        ))}
+                    </select>
+                ) : (
+                    <input
+                        id={id}
+                        type={inputType}
+                        className="floating-field-input"
+                        value={value || ''}
+                        onChange={(e) => onChange(e.target.value)}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={(e) => {
+                            setIsFocused(false);
+                            onBlur?.(e);
+                        }}
+                        autoFocus={autoFocus}
+                        maxLength={maxLength}
+                        required={required}
+                        autoComplete="off"
+                    />
+                )}
+
+                {/* Password visibility toggle button */}
+                {type === 'password' && (
+                    <button
+                        type="button"
+                        className="floating-password-toggle"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setShowPassword(!showPassword);
+                        }}
+                        title={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                        tabIndex={-1}
+                    >
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                )}
+            </div>
+
+            {placeholderHelper && <span className="floating-field-helper">{placeholderHelper}</span>}
+            {error && <small className="field-error">{error}</small>}
+        </div>
+    );
+};
 
 export const LoginPage = () => {
     const [, navigate] = useLocation();
@@ -23,6 +129,14 @@ export const LoginPage = () => {
     const [step, setStep] = useState(1);
     const [direction, setDirection] = useState('next');
     const [errors, setErrors] = useState({});
+
+    // 4-part name state
+    const [nameParts, setNameParts] = useState({
+        first: '',
+        second: '',
+        third: '',
+        last: '',
+    });
 
     const [profile, setProfile] = useState({
         name: '',
@@ -46,10 +160,21 @@ export const LoginPage = () => {
     const gradeOptions = currentStageInfo.grades;
     const trackOptions = currentStageInfo.tracks;
 
-    const validateField = (key, value) => {
-        if (key === 'name' && value.trim().length < 3) {
-            return 'اكتب الاسم بالكامل (٣ أحرف على الأقل).';
+    const handleNamePartChange = (partKey, val) => {
+        const nextParts = { ...nameParts, [partKey]: val };
+        setNameParts(nextParts);
+        const combined = [nextParts.first, nextParts.second, nextParts.third, nextParts.last]
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .join(' ');
+        setProfile((prev) => ({ ...prev, name: combined }));
+
+        if (errors[partKey] || errors.name) {
+            setErrors((prev) => ({ ...prev, [partKey]: '', name: '' }));
         }
+    };
+
+    const validateField = (key, value) => {
         if (key === 'email' && !/^\S+@\S+\.\S+$/.test(value)) {
             return 'اكتب بريدًا إلكترونيًا صحيحًا.';
         }
@@ -83,16 +208,32 @@ export const LoginPage = () => {
         }
 
         if (step === 1) {
-            const nameErr = validateField('name', profile.name);
+            let hasNameErr = false;
+            if (!nameParts.first.trim()) {
+                nextErrors.firstName = 'اكتب الاسم الأول.';
+                hasNameErr = true;
+            }
+            if (!nameParts.second.trim()) {
+                nextErrors.secondName = 'اكتب الاسم الثاني.';
+                hasNameErr = true;
+            }
+            if (!nameParts.third.trim()) {
+                nextErrors.thirdName = 'اكتب الاسم الثالث.';
+                hasNameErr = true;
+            }
+            if (!nameParts.last.trim()) {
+                nextErrors.lastName = 'اكتب الاسم الأخير.';
+                hasNameErr = true;
+            }
+
             const emailErr = validateField('email', profile.email);
             const passErr = validateField('password', password);
             const phoneErr = validateField('phone', profile.phone || '');
-            if (nameErr) nextErrors.name = nameErr;
             if (emailErr) nextErrors.email = emailErr;
             if (passErr) nextErrors.password = passErr;
             if (phoneErr) nextErrors.phone = phoneErr;
             setErrors(nextErrors);
-            return !nameErr && !emailErr && !passErr && !phoneErr;
+            return !hasNameErr && !emailErr && !passErr && !phoneErr;
         }
 
         return true;
@@ -183,7 +324,7 @@ export const LoginPage = () => {
                             : '٣ خطوات سريعة لنجهز لك تجربة مخصصة على مقاس مرحلتك وتخصصك.'}
                     </p>
 
-                    {/* Mode Switch (Login / Register) */}
+                    {/* Mode Switch Tabs */}
                     <div className="mode-switch">
                         <button
                             type="button"
@@ -240,44 +381,35 @@ export const LoginPage = () => {
                     <form onSubmit={handleSubmit} noValidate>
                         <div className={`wizard-stage wizard-${direction}`} key={`${mode}-${step}`}>
                             {mode === 'login' ? (
-                                /* Login View */
+                                /* Login View with Floating Inputs */
                                 <div className="wizard-fields">
-                                    <div className="form-group">
-                                        <label className="form-label" htmlFor="login-email">البريد الإلكتروني</label>
-                                        <input
-                                            id="login-email"
-                                            type="email"
-                                            className="form-input"
-                                            value={profile.email}
-                                            onChange={(e) => updateProfileField('email', e.target.value)}
-                                            placeholder="you@example.com"
-                                            aria-invalid={Boolean(errors.email)}
-                                        />
-                                        {errors.email && <small className="field-error">{errors.email}</small>}
-                                    </div>
+                                    <FloatingField
+                                        id="login-email"
+                                        label="البريد الإلكتروني"
+                                        icon={Mail}
+                                        type="email"
+                                        value={profile.email}
+                                        onChange={(val) => updateProfileField('email', val)}
+                                        placeholderHelper="اكتب البريد المسجل به في المنصة"
+                                        error={errors.email}
+                                    />
 
-                                    <div className="form-group">
-                                        <label className="form-label" htmlFor="login-password">كلمة المرور</label>
-                                        <div className="password-field">
-                                            <input
-                                                id="login-password"
-                                                type="password"
-                                                className="form-input"
-                                                value={password}
-                                                onChange={(e) => {
-                                                    setPassword(e.target.value);
-                                                    setErrors((prev) => ({
-                                                        ...prev,
-                                                        password: validateField('password', e.target.value),
-                                                    }));
-                                                }}
-                                                placeholder="••••••••"
-                                                aria-invalid={Boolean(errors.password)}
-                                            />
-                                            <ShieldCheck size={18} />
-                                        </div>
-                                        {errors.password && <small className="field-error">{errors.password}</small>}
-                                    </div>
+                                    <FloatingField
+                                        id="login-password"
+                                        label="كلمة المرور"
+                                        icon={Lock}
+                                        type="password"
+                                        value={password}
+                                        onChange={(val) => {
+                                            setPassword(val);
+                                            setErrors((prev) => ({
+                                                ...prev,
+                                                password: validateField('password', val),
+                                            }));
+                                        }}
+                                        placeholderHelper="كلمة المرور الخاصة بحسابك"
+                                        error={errors.password}
+                                    />
 
                                     <div className="form-row">
                                         <label className="check-row">
@@ -292,97 +424,117 @@ export const LoginPage = () => {
                                         </button>
                                     </div>
 
-                                    <button className="btn btn-primary btn-wide login-submit" type="submit">
-                                        <LogIn size={17} /> دخول مساحة الطالب
+                                    {/* Prominent High-Contrast Solid Action Button */}
+                                    <button className="btn btn-primary btn-wide login-submit-btn" type="submit">
+                                        <LogIn size={18} />
+                                        <span>تسجيل الدخول</span>
                                     </button>
                                 </div>
                             ) : (
-                                /* Register Multi-step Wizard */
+                                /* Register Multi-step Wizard with Floating Inputs */
                                 <>
                                     {step === 1 && (
                                         <div className="wizard-fields">
-                                            <div className="form-group">
-                                                <label className="form-label" htmlFor="reg-name">الاسم بالكامل</label>
-                                                <input
-                                                    id="reg-name"
-                                                    type="text"
-                                                    className="form-input"
-                                                    value={profile.name}
-                                                    onChange={(e) => updateProfileField('name', e.target.value)}
-                                                    placeholder="مثال: سارة أحمد محمد"
-                                                    aria-invalid={Boolean(errors.name)}
-                                                />
-                                                {errors.name && <small className="field-error">{errors.name}</small>}
+                                            {/* 4-Part Floating Label Name Grid in Nawa Brand Identity */}
+                                            <div className="form-group" style={{ gap: 8 }}>
+                                                <label className="form-label">الاسم رباعي (كما في البطاقة الرسمية)</label>
+                                                <div className="name-quad-grid">
+                                                    <FloatingField
+                                                        id="reg-first-name"
+                                                        label="الاسم الأول"
+                                                        icon={UserRound}
+                                                        value={nameParts.first}
+                                                        onChange={(val) => handleNamePartChange('first', val)}
+                                                        placeholderHelper="اكتب اسمك بالعربي زي اللي موجود في البطاقة"
+                                                        error={errors.firstName}
+                                                    />
+
+                                                    <FloatingField
+                                                        id="reg-second-name"
+                                                        label="الاسم الثاني"
+                                                        icon={UserRound}
+                                                        value={nameParts.second}
+                                                        onChange={(val) => handleNamePartChange('second', val)}
+                                                        placeholderHelper="اكتب اسمك بالعربي زي اللي موجود في البطاقة"
+                                                        error={errors.secondName}
+                                                    />
+
+                                                    <FloatingField
+                                                        id="reg-third-name"
+                                                        label="الاسم الثالث"
+                                                        icon={UserRound}
+                                                        value={nameParts.third}
+                                                        onChange={(val) => handleNamePartChange('third', val)}
+                                                        placeholderHelper="اكتب اسمك بالعربي زي اللي موجود في البطاقة"
+                                                        error={errors.thirdName}
+                                                    />
+
+                                                    <FloatingField
+                                                        id="reg-last-name"
+                                                        label="الاسم الأخير"
+                                                        icon={UserRound}
+                                                        value={nameParts.last}
+                                                        onChange={(val) => handleNamePartChange('last', val)}
+                                                        placeholderHelper="اكتب اسمك بالعربي زي اللي موجود في البطاقة"
+                                                        error={errors.lastName}
+                                                    />
+                                                </div>
                                             </div>
 
+                                            {/* Phone & Governorate Grid with Floating Labels */}
                                             <div className="form-grid compact-grid">
-                                                <div className="form-group">
-                                                    <label className="form-label" htmlFor="reg-phone">رقم الهاتف</label>
-                                                    <input
-                                                        id="reg-phone"
-                                                        type="tel"
-                                                        inputMode="numeric"
-                                                        autoComplete="tel"
-                                                        className="form-input"
-                                                        value={profile.phone || ''}
-                                                        onChange={(e) => updateProfileField('phone', e.target.value)}
-                                                        placeholder="01X XXX XXXX"
-                                                        aria-invalid={Boolean(errors.phone)}
-                                                    />
-                                                    {errors.phone && <small className="field-error">{errors.phone}</small>}
-                                                </div>
-
-                                                <div className="form-group">
-                                                    <label className="form-label" htmlFor="reg-gov">المحافظة</label>
-                                                    <select
-                                                        id="reg-gov"
-                                                        className="form-select"
-                                                        value={profile.governorate}
-                                                        onChange={(e) => updateProfileField('governorate', e.target.value)}
-                                                    >
-                                                        {egyptEducationOptions.governorates.map((gov) => (
-                                                            <option key={gov} value={gov}>{gov}</option>
-                                                        ))}
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <div className="form-group">
-                                                <label className="form-label" htmlFor="reg-email">البريد الإلكتروني</label>
-                                                <input
-                                                    id="reg-email"
-                                                    type="email"
-                                                    className="form-input"
-                                                    value={profile.email}
-                                                    onChange={(e) => updateProfileField('email', e.target.value)}
-                                                    placeholder="you@example.com"
-                                                    aria-invalid={Boolean(errors.email)}
+                                                <FloatingField
+                                                    id="reg-phone"
+                                                    label="رقم الهاتف"
+                                                    icon={Phone}
+                                                    type="tel"
+                                                    value={profile.phone || ''}
+                                                    onChange={(val) => updateProfileField('phone', val)}
+                                                    placeholderHelper="01X XXX XXXX"
+                                                    error={errors.phone}
                                                 />
-                                                {errors.email && <small className="field-error">{errors.email}</small>}
+
+                                                <FloatingField
+                                                    id="reg-gov"
+                                                    label="المحافظة"
+                                                    icon={MapPin}
+                                                    type="select"
+                                                    value={profile.governorate}
+                                                    onChange={(val) => updateProfileField('governorate', val)}
+                                                    options={egyptEducationOptions.governorates}
+                                                    placeholderHelper="اختر محافظتك من القائمة"
+                                                />
                                             </div>
 
-                                            <div className="form-group">
-                                                <label className="form-label" htmlFor="reg-pass">كلمة المرور</label>
-                                                <div className="password-field">
-                                                    <input
-                                                        id="reg-pass"
-                                                        type="password"
-                                                        className="form-input"
-                                                        value={password}
-                                                        onChange={(e) => {
-                                                            setPassword(e.target.value);
-                                                            setErrors((prev) => ({
-                                                                ...prev,
-                                                                password: validateField('password', e.target.value),
-                                                            }));
-                                                        }}
-                                                        placeholder="٦ أحرف على الأقل"
-                                                        aria-invalid={Boolean(errors.password)}
-                                                    />
-                                                    <ShieldCheck size={18} />
-                                                </div>
-                                                {errors.password && <small className="field-error">{errors.password}</small>}
-                                            </div>
+                                            {/* Email with Floating Label */}
+                                            <FloatingField
+                                                id="reg-email"
+                                                label="البريد الإلكتروني"
+                                                icon={Mail}
+                                                type="email"
+                                                value={profile.email}
+                                                onChange={(val) => updateProfileField('email', val)}
+                                                placeholderHelper="you@example.com"
+                                                error={errors.email}
+                                            />
+
+                                            {/* Password with Floating Label */}
+                                            <FloatingField
+                                                id="reg-pass"
+                                                label="كلمة المرور"
+                                                icon={Lock}
+                                                type="password"
+                                                value={password}
+                                                onChange={(val) => {
+                                                    setPassword(val);
+                                                    setErrors((prev) => ({
+                                                        ...prev,
+                                                        password: validateField('password', val),
+                                                    }));
+                                                }}
+                                                placeholderHelper="٦ أحرف أو أكثر لتأمين حسابك"
+                                                error={errors.password}
+                                            />
                                         </div>
                                     )}
 
@@ -418,60 +570,48 @@ export const LoginPage = () => {
                                             </div>
 
                                             <div className="form-grid compact-grid">
-                                                <div className="form-group">
-                                                    <label className="form-label" htmlFor="reg-grade">الصف الدراسي</label>
-                                                    <select
-                                                        id="reg-grade"
-                                                        className="form-select"
-                                                        value={profile.grade}
-                                                        onChange={(e) => updateProfileField('grade', e.target.value)}
-                                                    >
-                                                        {gradeOptions.map((g) => (
-                                                            <option key={g} value={g}>{g}</option>
-                                                        ))}
-                                                    </select>
-                                                </div>
+                                                <FloatingField
+                                                    id="reg-grade"
+                                                    label="الصف الدراسي"
+                                                    icon={GraduationCap}
+                                                    type="select"
+                                                    value={profile.grade}
+                                                    onChange={(val) => updateProfileField('grade', val)}
+                                                    options={gradeOptions}
+                                                />
 
-                                                <div className="form-group">
-                                                    <label className="form-label" htmlFor="reg-track">المسار / الشعبة</label>
-                                                    <select
-                                                        id="reg-track"
-                                                        className="form-select"
-                                                        value={profile.track}
-                                                        onChange={(e) => updateProfileField('track', e.target.value)}
-                                                    >
-                                                        {trackOptions.map((t) => (
-                                                            <option key={t} value={t}>{t}</option>
-                                                        ))}
-                                                    </select>
-                                                </div>
+                                                <FloatingField
+                                                    id="reg-track"
+                                                    label="المسار / الشعبة"
+                                                    icon={BookOpen}
+                                                    type="select"
+                                                    value={profile.track}
+                                                    onChange={(val) => updateProfileField('track', val)}
+                                                    options={trackOptions}
+                                                />
                                             </div>
 
                                             <div className="form-grid compact-grid">
-                                                <div className="form-group">
-                                                    <label className="form-label" htmlFor="reg-guardian">رقم ولي الأمر (اختياري)</label>
-                                                    <input
-                                                        id="reg-guardian"
-                                                        type="tel"
-                                                        className="form-input"
-                                                        value={profile.guardian || ''}
-                                                        onChange={(e) => updateProfileField('guardian', e.target.value)}
-                                                        placeholder="01X XXX XXXX"
-                                                    />
-                                                </div>
+                                                <FloatingField
+                                                    id="reg-guardian"
+                                                    label="رقم ولي الأمر (اختياري)"
+                                                    icon={Phone}
+                                                    type="tel"
+                                                    value={profile.guardian || ''}
+                                                    onChange={(val) => updateProfileField('guardian', val)}
+                                                    placeholderHelper="01X XXX XXXX"
+                                                />
 
-                                                <div className="form-group">
-                                                    <label className="form-label" htmlFor="reg-nid">الرقم القومي (اختياري)</label>
-                                                    <input
-                                                        id="reg-nid"
-                                                        type="text"
-                                                        maxLength={14}
-                                                        className="form-input"
-                                                        value={profile.nationalId || ''}
-                                                        onChange={(e) => updateProfileField('nationalId', e.target.value)}
-                                                        placeholder="١٤ رقمًا"
-                                                    />
-                                                </div>
+                                                <FloatingField
+                                                    id="reg-nid"
+                                                    label="الرقم القومي (اختياري)"
+                                                    icon={CreditCard}
+                                                    type="text"
+                                                    maxLength={14}
+                                                    value={profile.nationalId || ''}
+                                                    onChange={(val) => updateProfileField('nationalId', val)}
+                                                    placeholderHelper="١٤ رقمًا بالبطاقة"
+                                                />
                                             </div>
 
                                             <div className="wizard-hint">
@@ -497,7 +637,7 @@ export const LoginPage = () => {
 
                                             <div className="review-list">
                                                 <div>
-                                                    <span>الاسم</span>
+                                                    <span>الاسم رباعي</span>
                                                     <strong>{profile.name || '—'}</strong>
                                                 </div>
                                                 <div>
@@ -531,11 +671,13 @@ export const LoginPage = () => {
 
                                         {step < totalSteps ? (
                                             <button type="button" className="btn btn-primary" onClick={nextStep}>
-                                                التالي <ArrowLeft size={15} />
+                                                <span>التالي</span>
+                                                <ArrowLeft size={16} />
                                             </button>
                                         ) : (
                                             <button className="btn btn-primary" type="submit">
-                                                <Check size={16} /> إنشاء الحساب والبدء
+                                                <Check size={17} />
+                                                <span>إنشاء الحساب والبدء</span>
                                             </button>
                                         )}
                                     </div>

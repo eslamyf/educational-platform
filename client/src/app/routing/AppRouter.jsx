@@ -5,6 +5,7 @@ import CourseDetailPage from '@/features/catalog/pages/CourseDetailPage';
 import CoursesPage from '@/features/catalog/pages/CoursesPage';
 import LoginPage from '@/features/auth/pages/LoginPage';
 import WelcomePage from '@/features/auth/pages/WelcomePage';
+import AboutPage from '@/features/marketing/pages/AboutPage';
 import InstructorDashboardPage from '@/features/instructor-dashboard/pages/InstructorDashboardPage';
 import LearnCoursePage from '@/features/learning/pages/LearnCoursePage';
 import HomePage from '@/features/marketing/pages/HomePage';
@@ -16,6 +17,9 @@ export function AppRouter() {
     return (
         <Switch>
             <Route path="/" component={HomePage} />
+            <Route path="/about" component={AboutPage} />
+            <Route path="/how-it-works" component={AboutPage} />
+            <Route path="/about-us" component={AboutPage} />
             <Route path="/courses" component={CoursesPage} />
             <Route path="/course/:id" component={CourseDetailPage} />
             <Route path="/cart" component={CartPage} />

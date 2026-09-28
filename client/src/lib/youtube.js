@@ -36,6 +36,7 @@ export const getYouTubeVideoId = (value) => {
 };
 
 export const getYouTubeEmbedUrl = (videoId) => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const params = new URLSearchParams({
         enablejsapi: '1',
         controls: '0',
@@ -45,6 +46,14 @@ export const getYouTubeEmbedUrl = (videoId) => {
         modestbranding: '1',
         rel: '0',
         playsinline: '1',
+        showinfo: '0',
+        color: 'white',
+        autohide: '1',
+        cc_load_policy: '0',
     });
-    return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
+    if (origin) {
+        params.set('origin', origin);
+        params.set('widget_referrer', origin);
+    }
+    return `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
 };

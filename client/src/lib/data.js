@@ -668,9 +668,9 @@ export const stats = [
 export const badges = ['نخبة من كبار المعلمين', 'مشاهدة ومتابعة مدى الحياة', 'تمارين وفيديوهات عالية الدقة'];
 
 export const footerColumns = [
-    { title: 'استكشف', links: ['كل الكورسات', 'المناهج الدراسية', 'المهارات الرقمية'] },
-    { title: 'نَوَى', links: ['عن المنصة', 'المعلمون والخبراء', 'تواصل معنا'] },
-    { title: 'مساعدة', links: ['الأسئلة الشائعة', 'سياسة الاسترجاع', 'الدعم الفني'] },
+    { title: 'استكشف', links: ['كل الكورسات', 'المناهج الدراسية'] },
+    { title: 'نَوَى', links: ['عن المنصة', 'المعلمون والخبراء', 'كيفية الاشتراك في الكورس'] },
+    { title: 'الدعم والمساعدة', links: ['تواصل معنا والدعم الفني', 'الشروط والأحكام', 'سياسة الخصوصية'] },
 ];
 
 export const faq = [
@@ -734,7 +734,7 @@ export const buyNowLabel = 'ابدأ الآن';
 export const courseCta = 'تفاصيل المسار';
 export const continueLabel = 'متابعة الشراء';
 export const emptySearch = 'جرّب كتابة كلمة بحث أخرى أو اختيار تصنيف مختلف.';
-export const footerNote = 'منصة تعليمية عربية تجمع المناهج الدراسية والمهارات الرقمية الحديثة.';
+export const footerNote = 'منصة تعليمية عربية متخصصة في مناهج الثانوية العامة والبكالوريا المصرية الحديثة.';
 export const menuAria = 'فتح القائمة';
 export const cartAria = 'فتح السلة';
 export const searchAria = 'فتح البحث';
@@ -752,16 +752,16 @@ export const logoWord = 'نَوَى';
 export const logoSub = 'تعلّمٌ يشبهك';
 export const numericLocale = 'ar-EG';
 export const currency = 'ج.م';
-export const refNote = 'منصة نَوَى التعليمية — بيئة متكاملة للتعلم المدرسي والمهارات المعاصرة.';
+export const refNote = 'منصة نَوَى التعليمية — بيئة متكاملة لمناهج الثانوية العامة والبكالوريا المصرية.';
 export const scrollRevealClass = 'reveal';
 export const reducedMotionNote = 'تحترم الواجهة إعداد تقليل الحركة في النظام.';
 export const designTone = 'Warm editorial learning';
 export const colorPalette = { ink: '#252622', paper: '#f7f3ed', mist: '#ebe6dd', coral: '#d86e4d', olive: '#6c775d', clay: '#bd9474', line: '#ded7cc' };
 export const typography = { display: 'Noto Kufi Arabic', body: 'IBM Plex Sans Arabic', latin: 'DM Sans' };
 export const iconSet = 'Lucide React';
-export const inspirationSummary = 'تجربة تعليمية متكاملة تجمع المناهج الدراسية والمهارات الرقمية.';
+export const inspirationSummary = 'تجربة تعليمية متكاملة لمناهج الثانوية العامة والبكالوريا المصرية.';
 export const assetSummary = 'صور عالية الدقة مستضافة بجودة فائقة تناسب بيئة نَوَى.';
-export const appDescription = 'منصة تعليمية عربية حديثة تجمع بين مناهج الثانوية العامة والبكالوريا المصرية والمهارات الرقمية والعملية.';
+export const appDescription = 'منصة تعليمية عربية حديثة متخصصة في مناهج الثانوية العامة والبكالوريا المصرية بأحدث الطرق التفاعلية.';
 export const courseDetailSections = ['عن المسار', 'المنهج والمحاضرات', 'آراء المتعلّمين', 'أسئلة شائعة'];
 export const stickyPurchaseTitle = 'جاهز تبدأ رحلتك؟';
 export const stickyPurchaseSubtitle = 'انضم لآلاف المتعلّمين وابدأ أول درس اليوم.';
@@ -780,7 +780,7 @@ export const sectionSubtitle = 'شروحات مبسطة ومباشرة مع أف
 export const homeHowTitle = 'رحلة تعلّم واضحة ومنظمة';
 export const homeHowBody = 'اختر مجالك أو مرحلتك الدراسية، شاهد الدروس بتركيز، وطبّق ما تعلمته خطوة بخطوة.';
 export const howSteps = [
-    { number: '٠١', title: 'اختر مجالك', text: 'حدد مرحلتك الدراسية أو المهارة الرقمية التي تريد إتقانها.' },
+    { number: '٠١', title: 'حدد مسارك', text: 'حدد مرحلتك الدراسية أو شعبتك التي تريد التفوق فيها.' },
     { number: '٠٢', title: 'تعلّم مع الخبراء', text: 'محاضرات عالية الجودة مقسمة لوحدات ذكية تناسب وقتك.' },
     { number: '٠٣', title: 'طبّق وتفوق', text: 'اختبارات قصيرة وتدريبات عملية تضمن استيعابك الكامل.' },
 ];
@@ -830,14 +830,14 @@ export const highlightClass = 'highlight-word';
 export const rtl = 'rtl';
 export const versionLabel = 'النسخة الرسمية';
 export const demoLabel = 'بيانات جاهزة للتشغيل';
-export const researchDisclaimer = 'منصة تعليمية متطورة مصممة للمتعلمين العرب.';
+export const researchDisclaimer = 'منصة تعليمية متطورة مصممة للمتعلمين في الثانوية العامة والبكالوريا المصرية.';
 export const primaryImageAlt = 'غلاف المسار التعليمي';
 export const fallbackAvatar = image('photo-1494790108377-be9c29b29330', 180);
 export const defaultCourse = featuredCourse;
 export const currentRoute = '/';
 export const productName = 'نَوَى';
 export const productTagline = 'تعلّمٌ يشبهك.';
-export const seoTitle = 'نَوَى — منصة تعلّم عربية حديثة للمناهج والمهارات';
+export const seoTitle = 'نَوَى — منصة تعلّم عربية حديثة للثانوية العامة والبكالوريا';
 export const seoDescription = appDescription;
 export const designReferenceNote = 'تصميم تحريري عربي هادئ وراقٍ.';
 export const footerLinks = ['الشروط والأحكام', 'سياسة الخصوصية', 'حقوق الملكية'];

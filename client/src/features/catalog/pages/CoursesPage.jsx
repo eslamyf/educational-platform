@@ -216,69 +216,92 @@ export const CoursesPage = () => {
                     </div>
 
                     {/* Smart Cascading Unified Filter Card */}
-                    <div className="unified-filter-card">
-                        {/* Step 1: Track / Stage Selection */}
-                        <div className="unified-filter-top">
-                            <div className="unified-track-chips">
-                                {categories.map((item) => (
-                                    <button
-                                        type="button"
-                                        className={`track-chip-btn ${category === item ? 'active' : ''}`}
-                                        key={item}
-                                        onClick={() => handleTrackChange(item)}
-                                    >
-                                        {item}
-                                    </button>
-                                ))}
-                            </div>
+                    <div className="unified-filter-card" dir="rtl">
+                        {/* Row 1: Track & Stage Selection Tabs */}
+                        <div className="unified-track-chips">
+                            {categories.map((item) => (
+                                <button
+                                    type="button"
+                                    className={`track-chip-btn ${category === item ? 'active' : ''}`}
+                                    key={item}
+                                    onClick={() => handleTrackChange(item)}
+                                >
+                                    {item}
+                                </button>
+                            ))}
+                        </div>
 
-                            <label className="unified-search-input">
-                                <Search size={16} />
+                        {/* Divider */}
+                        <div className="unified-filter-divider" />
+
+                        {/* Row 2: Proportional Search & Cascading Dropdowns Grid */}
+                        <div className="unified-filter-controls-grid">
+                            {/* Search Input Box */}
+                            <div className="unified-control-box unified-search-control">
+                                <Search size={16} className="control-icon" />
                                 <input
+                                    type="text"
                                     value={query}
                                     onChange={(e) => setQuery(e.target.value)}
                                     placeholder="ابحث عن مادة، صف، أو معلّم..."
+                                    className="unified-control-input"
                                 />
                                 {query && (
                                     <button
                                         type="button"
                                         onClick={() => setQuery('')}
-                                        style={{ background: 'transparent', cursor: 'pointer', display: 'grid', placeItems: 'center', color: 'var(--muted)', padding: 0 }}
+                                        className="unified-clear-btn"
                                         title="مسح البحث"
                                     >
-                                        <X size={15} />
+                                        <X size={14} />
                                     </button>
                                 )}
-                            </label>
-                        </div>
+                            </div>
 
-                        {/* Step 2 & 3: Cascading Grade & Subject Dropdowns */}
-                        <div className="unified-filter-bottom">
-                            <div className="unified-selects-group">
-                                <div className="unified-filter-select">
-                                    <GraduationCap size={15} color="var(--olive-dark)" />
-                                    <label>الصف الدراسي:</label>
-                                    <select value={grade} onChange={(e) => setGrade(e.target.value)}>
+                            {/* Grade Dropdown Box */}
+                            <div className="unified-control-box">
+                                <GraduationCap size={16} className="control-icon text-olive" />
+                                <div className="control-select-wrap">
+                                    <span className="control-label">الصف:</span>
+                                    <select
+                                        value={grade}
+                                        onChange={(e) => setGrade(e.target.value)}
+                                        className="control-select"
+                                    >
                                         {availableGrades.map((item) => (
                                             <option key={item} value={item}>{item}</option>
                                         ))}
                                     </select>
                                 </div>
+                            </div>
 
-                                <div className="unified-filter-select">
-                                    <Sparkles size={14} color="var(--coral-dark)" />
-                                    <label>المادة المقررة:</label>
-                                    <select value={subject} onChange={(e) => setSubject(e.target.value)}>
+                            {/* Subject Dropdown Box */}
+                            <div className="unified-control-box">
+                                <Sparkles size={15} className="control-icon text-coral" />
+                                <div className="control-select-wrap">
+                                    <span className="control-label">المادة:</span>
+                                    <select
+                                        value={subject}
+                                        onChange={(e) => setSubject(e.target.value)}
+                                        className="control-select"
+                                    >
                                         {availableSubjects.map((item) => (
                                             <option key={item} value={item}>{item}</option>
                                         ))}
                                     </select>
                                 </div>
+                            </div>
 
-                                <div className="unified-filter-select">
-                                    <ArrowUpDown size={14} color="var(--muted)" />
-                                    <label>الترتيب:</label>
-                                    <select value={sort} onChange={(e) => setSort(e.target.value)}>
+                            {/* Sort Dropdown Box */}
+                            <div className="unified-control-box">
+                                <ArrowUpDown size={15} className="control-icon text-muted" />
+                                <div className="control-select-wrap">
+                                    <span className="control-label">الترتيب:</span>
+                                    <select
+                                        value={sort}
+                                        onChange={(e) => setSort(e.target.value)}
+                                        className="control-select"
+                                    >
                                         <option value="الأكثر صلة">الأكثر صلة</option>
                                         <option value="الأعلى تقييمًا">الأعلى تقييمًا</option>
                                         <option value="الأقل سعرًا">الأقل سعرًا</option>
@@ -287,9 +310,16 @@ export const CoursesPage = () => {
                                 </div>
                             </div>
 
+                            {/* Reset Button */}
                             {isFiltered && (
-                                <button type="button" className="unified-reset-btn" onClick={resetFilters}>
-                                    <RotateCcw size={13} /> إعادة ضبط الفلاتر
+                                <button
+                                    type="button"
+                                    className="unified-reset-btn"
+                                    onClick={resetFilters}
+                                    title="إعادة ضبط الفلاتر"
+                                >
+                                    <RotateCcw size={13} />
+                                    <span>إعادة ضبط</span>
                                 </button>
                             )}
                         </div>

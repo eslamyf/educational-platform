@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Search, UserRound, LogOut, Menu, X } from 'lucide-react';
+import { Search, UserRound, LogOut, Menu, X, Moon, Sun } from 'lucide-react';
 import { Logo } from '@/components/common/Logo';
 import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { SearchModal } from '@/components/common/SearchModal';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/hooks/useTheme';
 import { navItems } from '@/lib/data';
 
 export const Header = () => {
@@ -13,6 +14,7 @@ export const Header = () => {
     const [searchOpen, setSearchOpen] = useState(false);
     const [scrollProgress, setScrollProgress] = useState(0);
     const { isAuthenticated, role, user, logout } = useAuth();
+    const { theme, toggleTheme } = useTheme();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -36,7 +38,7 @@ export const Header = () => {
                     <div className="pill-nav-right">
                         <Logo className="pill-nav-logo" />
 
-                        <div className="pill-nav-theme-toggle">
+                        <div className="pill-nav-theme-toggle hide-mobile-md">
                             <ThemeToggle />
                         </div>
 
@@ -53,7 +55,7 @@ export const Header = () => {
                         </button>
                     </div>
 
-                    {/* Center Navigation Links */}
+                    {/* Center Navigation Links & Mobile Menu Drawer */}
                     <div className={`pill-nav-center ${mobileMenuOpen ? 'mobile-open' : ''}`}>
                         {navItems.map((item) => {
                             const isHash = item.href.includes('#');
@@ -91,6 +93,71 @@ export const Header = () => {
                                 {role === 'instructor' ? 'لوحة المعلم' : 'مساحة الطالب'}
                             </Link>
                         )}
+
+                        {/* Mobile Menu Actions & Theme Toggle */}
+                        <div className="mobile-drawer-actions">
+                            <button
+                                type="button"
+                                className="mobile-drawer-search-btn"
+                                onClick={() => {
+                                    setMobileMenuOpen(false);
+                                    setSearchOpen(true);
+                                }}
+                            >
+                                <Search size={16} />
+                                <span>ابحث في المنصة والمناهج...</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                className="mobile-drawer-theme-btn"
+                                onClick={() => toggleTheme?.()}
+                                title={theme === 'dark' ? 'التحويل إلى الوضع النهاري' : 'التحويل إلى الوضع الليلي'}
+                            >
+                                <div className="mobile-drawer-theme-info">
+                                    <span className="mobile-drawer-theme-icon">
+                                        {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+                                    </span>
+                                    <span className="mobile-drawer-theme-text">
+                                        {theme === 'dark' ? 'الوضع النهاري' : 'الوضع الليلي'}
+                                    </span>
+                                </div>
+                                <span className="mobile-drawer-theme-badge">
+                                    {theme === 'dark' ? 'تفعيل النهاري ☀️' : 'تفعيل الليلي 🌙'}
+                                </span>
+                            </button>
+
+                            {isAuthenticated ? (
+                                <button
+                                    type="button"
+                                    className="mobile-drawer-logout-btn"
+                                    onClick={() => {
+                                        setMobileMenuOpen(false);
+                                        logout();
+                                    }}
+                                >
+                                    <LogOut size={16} />
+                                    <span>تسجيل الخروج</span>
+                                </button>
+                            ) : (
+                                <div className="mobile-drawer-auth-btns">
+                                    <Link
+                                        href="/login"
+                                        className="btn-pill-dark"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        تسجيل الدخول
+                                    </Link>
+                                    <Link
+                                        href="/login"
+                                        className="btn-pill-accent"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        حساب جديد
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Left Side: Dual Action Buttons / Logged in state + Mobile Toggle */}
@@ -105,26 +172,27 @@ export const Header = () => {
                                 >
                                     <span className="user-logged-tag">
                                         <UserRound size={15} />
-                                        <span>{user?.name?.split(' ')[0] || 'حسابي'}</span>
+                                        <span className="hide-mobile-xs">{user?.name?.split(' ')[0] || 'حسابي'}</span>
                                     </span>
                                 </Link>
 
                                 {/* Logout Button */}
                                 <button
                                     type="button"
-                                    className="btn-pill-logout"
+                                    className="btn-pill-logout hide-mobile-sm"
                                     onClick={() => logout()}
                                     title="تسجيل الخروج"
                                 >
                                     <LogOut size={14} />
-                                    <span className="hide-mobile-sm">خروج</span>
+                                    <span>خروج</span>
                                 </button>
                             </>
                         ) : (
                             <>
                                 {/* Login Button (Dark Pill) */}
                                 <Link href="/login" className="btn-pill-dark">
-                                    <span>تسجيل الدخول</span>
+                                    <span className="hide-mobile-xs">تسجيل الدخول</span>
+                                    <span className="show-mobile-xs">دخول</span>
                                 </Link>
 
                                 {/* Sign Up Button (Bright Accent Pill) */}
@@ -154,6 +222,7 @@ export const Header = () => {
                     />
                 </div>
             </header>
+            <div className="pill-nav-spacer" aria-hidden="true" />
 
             <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
         </>

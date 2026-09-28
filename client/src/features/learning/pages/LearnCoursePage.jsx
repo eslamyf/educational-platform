@@ -218,20 +218,57 @@ export const LearnCoursePage = () => {
                   <ChevronDown size={15} className="learn-module-chevron"/>
                 </button>
 
-                {isExpanded && <div className="learn-module-lessons">{mod.lessons.map((les, lesIdx) => {
-                        const isCurrent = moduleIndex === modIdx && lessonIndex === lesIdx;
-                        const lessonPosition = allLessons.findIndex((item) => item.moduleIndex === modIdx && item.lessonIndex === lesIdx);
-                        const lessonId = allLessons[lessonPosition]?.id ?? '';
-                        const isDone = isLessonCompleted(lessonId);
-                        const isUnlocked = lessonPosition === 0 || isLessonCompleted(allLessons[lessonPosition - 1]?.id ?? '');
-                        return (<button type="button" className={`learn-lesson ${isCurrent ? 'current' : ''}`} key={les.title} disabled={!isUnlocked} aria-disabled={!isUnlocked} title={!isUnlocked ? 'أكمل الدرس السابق لفتح هذه المحاضرة' : les.title} onClick={() => selectLesson(modIdx, lesIdx)}>
-                      <span className="learn-lesson-status">
-                        {isDone ? (<CheckCircle2 size={14} className="text-success"/>) : isUnlocked ? (<Play size={12}/>) : (<LockKeyhole size={13}/>)}
-                      </span>
-                      <em>{les.title}</em>
-                      <small>{les.duration}</small>
-                    </button>);
-                    })}</div>}
+                {isExpanded && (
+                  <div className="learn-module-lessons">
+                    {mod.lessons.map((les, lesIdx) => {
+                      const isCurrent = moduleIndex === modIdx && lessonIndex === lesIdx;
+                      const lessonPosition = allLessons.findIndex(
+                        (item) => item.moduleIndex === modIdx && item.lessonIndex === lesIdx
+                      );
+                      const lId = allLessons[lessonPosition]?.id ?? '';
+                      const isDone = isLessonCompleted(lId);
+                      const isUnlocked = lessonPosition === 0 || isLessonCompleted(allLessons[lessonPosition - 1]?.id ?? '');
+
+                      return (
+                        <button
+                          type="button"
+                          className={`learn-lesson ${isCurrent ? 'current' : ''} ${isDone ? 'completed' : ''} ${!isUnlocked ? 'locked' : ''}`}
+                          key={les.title}
+                          disabled={!isUnlocked}
+                          aria-disabled={!isUnlocked}
+                          title={!isUnlocked ? 'أكمل الدرس السابق أولاً لفتح هذه المحاضرة' : les.title}
+                          onClick={() => selectLesson(modIdx, lesIdx)}
+                        >
+                          <span
+                            className={`learn-lesson-badge ${
+                              isDone
+                                ? 'status-done'
+                                : isCurrent
+                                ? 'status-playing'
+                                : isUnlocked
+                                ? 'status-unlocked'
+                                : 'status-locked'
+                            }`}
+                          >
+                            {isDone ? (
+                              <CheckCircle2 size={15} />
+                            ) : isCurrent ? (
+                              <Play size={12} fill="currentColor" />
+                            ) : isUnlocked ? (
+                              <Play size={12} fill="currentColor" />
+                            ) : (
+                              <LockKeyhole size={13} />
+                            )}
+                          </span>
+                          <div className="learn-lesson-info">
+                            <span className="learn-lesson-title">{les.title}</span>
+                            <span className="learn-lesson-time">{les.duration}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>);
         })}
           </div>

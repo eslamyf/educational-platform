@@ -181,7 +181,7 @@ export const StudentDashboardPage = () => {
     ];
 
     return (
-        <PortalLayout activeTab={activeTab} role="student">
+        <PortalLayout activeTab={activeTab} onTabChange={handleTabChange} role="student">
             {/* =========================================================
                 TAB 1: نظرة عامة (OVERVIEW)
                 ========================================================= */}
@@ -190,9 +190,9 @@ export const StudentDashboardPage = () => {
                     <div className="portal-heading">
                         <div className="portal-heading-text">
                             <div className="eyebrow">مساحة الطالب التفاعلية</div>
-                            <h1 className="display">أهلًا يا {user?.name || 'اسلام'}، نكمّل؟</h1>
+                            <h1 className="display">أهلًا يا {user?.name || 'سارة أحمد'}، نكمّل؟</h1>
                             <p className="muted">
-                                مرحلتك: <strong>{user?.stage || 'البكالوريا المصرية'}</strong> · {user?.grade || 'الصف الثاني بالبكالوريا'}
+                                مرحلتك: <strong>{user?.stage || 'الثانوية العامة'}</strong> · {user?.grade || 'الصف الثالث الثانوي'}
                             </p>
                         </div>
                         <div className="portal-date">
@@ -277,55 +277,23 @@ export const StudentDashboardPage = () => {
                         </div>
                     </section>
 
-                    {/* Quick Enrolled Courses Preview */}
+                    {/* Quick Access to My Courses */}
                     <section className="portal-section" style={{ marginTop: 28 }}>
-                        <div className="portal-section-head">
-                            <div>
-                                <div className="eyebrow">المسارات الدراسية النشطة</div>
-                                <h2 className="section-title" style={{ fontSize: '1.4rem' }}>كورساتي الحالية</h2>
+                        <div className="overview-courses-banner">
+                            <div className="overview-courses-info">
+                                <div className="eyebrow">مكتبتك التعليمية</div>
+                                <h3>لديك {enrolled.length.toLocaleString('ar-EG')} مسارات تعليمية قيد التعلّم</h3>
+                                <p className="muted">
+                                    استعرض جميع الكورسات المشترك بها، المحاضرات المسجلة، وشيتات المراجعة في صفحة كورساتي.
+                                </p>
                             </div>
                             <button
                                 type="button"
-                                className="link-arrow"
+                                className="btn btn-primary"
                                 onClick={() => handleTabChange('courses')}
                             >
-                                عرض كل الكورسات ({enrolled.length.toLocaleString('ar-EG')}) <ArrowLeft size={14} />
+                                <BookOpen size={16} /> فتح كورساتي ({enrolled.length.toLocaleString('ar-EG')})
                             </button>
-                        </div>
-
-                        <div className="student-course-grid">
-                            {enrolled.slice(0, 2).map((item, index) => {
-                                const currentProgress = index === 0 ? progressPercent : 45;
-                                return (
-                                    <Link href={`/learn/${item.id}`} className="student-course-card" key={item.id}>
-                                        <div className="student-course-image">
-                                            <img src={item.image} alt={item.title} />
-                                            <span>{index === 0 ? 'قيد التعلّم النشط' : 'مستمر'}</span>
-                                        </div>
-                                        <div className="student-course-body">
-                                            <div className="student-course-top">
-                                                <span>{item.category}</span>
-                                                <span className="student-rating-badge">
-                                                    <Star size={13} fill="var(--yellow, #efc75e)" color="var(--yellow, #efc75e)" /> {item.rating}
-                                                </span>
-                                            </div>
-                                            <h3>{item.title}</h3>
-                                            <p className="student-course-next-lesson">
-                                                <Play size={14} /> {index === 0 ? lastLesson.title : 'قوانين كيرشوف واستراتيجيات الحل'}
-                                            </p>
-                                            <div className="course-progress">
-                                                <span style={{ width: `${currentProgress}%` }} />
-                                            </div>
-                                            <div className="student-course-bottom">
-                                                <small>{Math.round((item.lessons * currentProgress) / 100)} من {item.lessons} محاضرة</small>
-                                                <span className="btn-dashboard-resume">
-                                                    متابعة التعلّم <ArrowLeft size={13} />
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                );
-                            })}
                         </div>
                     </section>
                 </div>

@@ -13,6 +13,7 @@ import {
     Play,
     Pause,
     ChevronRight,
+    ChevronLeft,
 } from 'lucide-react';
 import { getYouTubeEmbedUrl, getYouTubeVideoId } from '@/lib/youtube';
 
@@ -44,18 +45,20 @@ const loadYouTubeApi = () => {
 };
 
 const SPEED_OPTIONS = [
+    { label: '0.5x (بطيء)', value: 0.5 },
     { label: '0.75x', value: 0.75 },
     { label: 'عادي (1x)', value: 1 },
     { label: '1.25x', value: 1.25 },
     { label: '1.5x', value: 1.5 },
     { label: '1.75x', value: 1.75 },
-    { label: '2x', value: 2 },
+    { label: '2x (سريع)', value: 2 },
 ];
 
 const QUALITY_OPTIONS = [
-    { label: '1080p Full HD', value: 'hd1080' },
-    { label: '720p HD', value: 'hd720' },
-    { label: '480p SD', value: 'large' },
+    { label: '1080p (Full HD)', value: 'hd1080' },
+    { label: '720p (HD)', value: 'hd720' },
+    { label: '480p (SD)', value: 'large' },
+    { label: '360p (توفير البيانات)', value: 'medium' },
     { label: 'تلقائي (Auto)', value: 'auto' },
 ];
 
@@ -83,6 +86,7 @@ export const VideoPlayer = ({
     const hideControlsTimeoutRef = useRef(null);
     const onWatchedRef = useRef(onWatched);
     const isWatchedRef = useRef(isWatched);
+    const isScrubbingRef = useRef(false);
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
@@ -96,8 +100,9 @@ export const VideoPlayer = ({
     const [settingsSubmenu, setSettingsSubmenu] = useState(null); // 'speed' | 'quality' | null
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showControls, setShowControls] = useState(true);
+    const [isScrubbing, setIsScrubbing] = useState(false);
     const [rippleState, setRippleState] = useState(null); // 'play' | 'pause' | 'forward' | 'replay' | null
-    const [watermarkPosition, setWatermarkPosition] = useState({ left: 25, top: 30, rotate: -2 });
+    const [watermarkPosition, setWatermarkPosition] = useState({ left: 30, top: 40, rotate: -2 });
 
     const videoId = lesson?.video ? getYouTubeVideoId(lesson.video) : null;
     const looksLikeYouTubeUrl = Boolean(lesson?.video && /youtube\.com|youtu\.be|youtube-nocookie\.com/i.test(lesson.video));
@@ -105,14 +110,14 @@ export const VideoPlayer = ({
     onWatchedRef.current = onWatched;
     isWatchedRef.current = isWatched;
 
-    // Drifting watermark animation
+    // Drifting watermark animation strictly inside video canvas (left: 20% to 75%, top: 25% to 70%)
     useEffect(() => {
         const moveWatermark = () => setWatermarkPosition({
-            left: 15 + Math.random() * 55,
-            top: 20 + Math.random() * 50,
+            left: 20 + Math.random() * 55, // 20% -> 75%
+            top: 25 + Math.random() * 45,  // 25% -> 70%
             rotate: -3 + Math.random() * 6,
         });
-        const interval = window.setInterval(moveWatermark, 5500);
+        const interval = window.setInterval(moveWatermark, 6500);
         return () => window.clearInterval(interval);
     }, []);
 
@@ -151,6 +156,7 @@ export const VideoPlayer = ({
 
                         progressInterval = window.setInterval(() => {
                             try {
+                                if (isScrubbingRef.current) return;
                                 const state = player.getPlayerState?.();
                                 const isCurrentlyPlaying = state === youtube.PlayerState.PLAYING;
                                 setIsPlaying(isCurrentlyPlaying);
@@ -256,15 +262,15 @@ export const VideoPlayer = ({
 
     // Seek handler (-10s / +10s)
     const handleSeek = (deltaSeconds) => {
-        if (videoId && playerRef.current?.getCurrentTime && playerRef.current?.seekTo) {
-            const current = playerRef.current.getCurrentTime() || 0;
-            const totalDur = playerRef.current.getDuration() || duration || 0;
+        if (videoId && playerRef.current) {
+            const current = playerRef.current.getCurrentTime?.() || currentTime || 0;
+            const totalDur = playerRef.current.getDuration?.() || duration || 0;
             const target = Math.max(0, Math.min(totalDur, current + deltaSeconds));
-            playerRef.current.seekTo(target, true);
             setCurrentTime(target);
+            playerRef.current.seekTo?.(target, true);
             triggerRipple(deltaSeconds > 0 ? 'forward' : 'replay');
         } else if (videoRef.current) {
-            const current = videoRef.current.currentTime || 0;
+            const current = videoRef.current.currentTime || currentTime || 0;
             const totalDur = videoRef.current.duration || duration || 0;
             const target = Math.max(0, Math.min(totalDur, current + deltaSeconds));
             videoRef.current.currentTime = target;
@@ -273,16 +279,70 @@ export const VideoPlayer = ({
         }
     };
 
-    // Scrubber change
+    // Scrubber Change Handlers
+    const handleScrubStart = () => {
+        isScrubbingRef.current = true;
+        setIsScrubbing(true);
+    };
+
     const handleScrub = (e) => {
         const newTime = parseFloat(e.target.value);
         setCurrentTime(newTime);
+    };
+
+    const handleScrubEnd = (e) => {
+        const targetTime = parseFloat(e.target.value ?? currentTime);
+        setCurrentTime(targetTime);
         if (videoId && playerRef.current?.seekTo) {
-            playerRef.current.seekTo(newTime, true);
+            playerRef.current.seekTo(targetTime, true);
         } else if (videoRef.current) {
-            videoRef.current.currentTime = newTime;
+            videoRef.current.currentTime = targetTime;
+        }
+        setTimeout(() => {
+            isScrubbingRef.current = false;
+            setIsScrubbing(false);
+        }, 120);
+    };
+
+    const handleTimelineClick = (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const percent = Math.max(0, Math.min(1, clickX / rect.width));
+        const totalDur = (videoId && playerRef.current?.getDuration?.()) || duration || 0;
+        const targetTime = percent * totalDur;
+        setCurrentTime(targetTime);
+        if (videoId && playerRef.current?.seekTo) {
+            playerRef.current.seekTo(targetTime, true);
+        } else if (videoRef.current) {
+            videoRef.current.currentTime = targetTime;
         }
     };
+
+    // Keyboard Shortcuts Listener
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+            if (e.code === 'Space' || e.key === 'k' || e.key === 'K') {
+                e.preventDefault();
+                togglePlay();
+            } else if (e.key === 'ArrowLeft' || e.key === 'j' || e.key === 'J') {
+                e.preventDefault();
+                handleSeek(-5);
+            } else if (e.key === 'ArrowRight' || e.key === 'l' || e.key === 'L') {
+                e.preventDefault();
+                handleSeek(5);
+            } else if (e.key === 'm' || e.key === 'M') {
+                e.preventDefault();
+                toggleMute();
+            } else if (e.key === 'f' || e.key === 'F') {
+                e.preventDefault();
+                toggleFullscreen();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isPlaying, currentTime, duration, volume, isMuted]);
 
     // Speed change handler
     const handleSpeedChange = (speed) => {
@@ -357,7 +417,9 @@ export const VideoPlayer = ({
 
     const handleNativeTimeUpdate = (e) => {
         const video = e.currentTarget;
-        setCurrentTime(video.currentTime);
+        if (!isScrubbingRef.current) {
+            setCurrentTime(video.currentTime);
+        }
         setDuration(video.duration || 0);
         if (video.buffered?.length > 0) {
             setBuffered((video.buffered.end(video.buffered.length - 1) / (video.duration || 1)) * 100);
@@ -378,6 +440,7 @@ export const VideoPlayer = ({
             ref={containerRef}
             onMouseMove={handleMouseMove}
             onMouseLeave={() => isPlaying && !settingsOpen && setShowControls(false)}
+            onContextMenu={(e) => e.preventDefault()}
         >
             {/* Topbar Info */}
             <div className="video-topbar">
@@ -438,6 +501,17 @@ export const VideoPlayer = ({
                     />
                 )}
 
+                {/* Anti-Navigation Bottom-Right Shield (Blocks clicking YouTube logo & watermark) */}
+                {videoId && (
+                    <div
+                        className="yt-bottom-shield"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            togglePlay();
+                        }}
+                    />
+                )}
+
                 {/* Video Central Click Surface (Click to play/pause, double click for fullscreen) */}
                 {hasActiveVideo && (
                     <div
@@ -457,32 +531,42 @@ export const VideoPlayer = ({
                     </div>
                 )}
 
-                {/* Anti-Piracy Drifting High-Contrast Watermark (Name · National ID) */}
-                <div
-                    className="video-watermark video-watermark-dynamic yt-watermark"
-                    style={{
-                        left: `${watermarkPosition.left}%`,
-                        top: `${watermarkPosition.top}%`,
-                        transform: `translate(-50%, -50%) rotate(${watermarkPosition.rotate}deg)`,
-                    }}
-                    aria-hidden="true"
-                >
-                    <span className="watermark-name">{displayStudentName}</span>
-                    <span className="watermark-id"> · {displayStudentId}</span>
+                {/* Anti-Piracy Drifting Watermark Layer strictly bounded within the video container */}
+                <div className="yt-watermark-layer" aria-hidden="true">
+                    <div
+                        className="video-watermark video-watermark-dynamic yt-watermark"
+                        style={{
+                            left: `${watermarkPosition.left}%`,
+                            top: `${watermarkPosition.top}%`,
+                            transform: `translate(-50%, -50%) rotate(${watermarkPosition.rotate}deg)`,
+                        }}
+                    >
+                        <span className="watermark-name">{displayStudentName}</span>
+                        <span className="watermark-id"> · {displayStudentId}</span>
+                    </div>
                 </div>
 
                 {/* YouTube-Exact Controls Overlay (Timeline Scrubber Line + Controls Bar) */}
                 {hasActiveVideo && (
-                    <div className={`yt-controls-overlay ${showControls || !isPlaying ? 'visible' : 'hidden'}`}>
-                        {/* Red Scrubber Timeline Bar */}
-                        <div className="yt-progress-container">
+                    <div className={`yt-controls-overlay ${showControls || !isPlaying ? 'visible' : 'hidden'}`} dir="ltr">
+                        {/* Red Scrubber Timeline Bar (Strict LTR direction & precision click seeking) */}
+                        <div
+                            className={`yt-progress-container ${isScrubbing ? 'scrubbing' : ''}`}
+                            dir="ltr"
+                            onClick={handleTimelineClick}
+                        >
                             <input
                                 type="range"
+                                dir="ltr"
                                 min="0"
                                 max={duration || 100}
                                 step="0.1"
                                 value={currentTime}
+                                onMouseDown={handleScrubStart}
+                                onTouchStart={handleScrubStart}
                                 onChange={handleScrub}
+                                onMouseUp={handleScrubEnd}
+                                onTouchEnd={handleScrubEnd}
                                 className="yt-progress-slider"
                                 aria-label="شريط وقت الفيديو"
                             />
@@ -572,18 +656,22 @@ export const VideoPlayer = ({
                                     </button>
 
                                     {settingsOpen && (
-                                        <div className="yt-settings-menu">
+                                        <div
+                                            className="yt-settings-menu"
+                                            onClick={(e) => e.stopPropagation()}
+                                            dir="rtl"
+                                        >
                                             {settingsSubmenu === null && (
-                                                <>
+                                                <div className="yt-menu-main">
                                                     <button
                                                         type="button"
                                                         className="yt-menu-row"
                                                         onClick={() => setSettingsSubmenu('speed')}
                                                     >
-                                                        <span>سرعة التشغيل</span>
+                                                        <span className="yt-menu-row-label">سرعة التشغيل</span>
                                                         <span className="yt-menu-val">
                                                             {SPEED_OPTIONS.find((s) => s.value === playbackSpeed)?.label || `${playbackSpeed}x`}
-                                                            <ChevronRight size={14} />
+                                                            <ChevronLeft size={14} />
                                                         </span>
                                                     </button>
                                                     <button
@@ -591,52 +679,64 @@ export const VideoPlayer = ({
                                                         className="yt-menu-row"
                                                         onClick={() => setSettingsSubmenu('quality')}
                                                     >
-                                                        <span>الجودة</span>
+                                                        <span className="yt-menu-row-label">جودة الفيديو</span>
                                                         <span className="yt-menu-val">
                                                             {QUALITY_OPTIONS.find((q) => q.value === selectedQuality)?.label.split(' ')[0] || 'تلقائي'}
-                                                            <ChevronRight size={14} />
+                                                            <ChevronLeft size={14} />
                                                         </span>
                                                     </button>
-                                                </>
+                                                </div>
                                             )}
 
                                             {settingsSubmenu === 'speed' && (
                                                 <div className="yt-submenu">
-                                                    <div className="yt-submenu-header" onClick={() => setSettingsSubmenu(null)}>
-                                                        <ChevronRight size={15} style={{ transform: 'rotate(180deg)' }} />
+                                                    <button
+                                                        type="button"
+                                                        className="yt-submenu-header"
+                                                        onClick={() => setSettingsSubmenu(null)}
+                                                    >
+                                                        <ChevronRight size={15} />
                                                         <span>سرعة التشغيل</span>
+                                                    </button>
+                                                    <div className="yt-submenu-list">
+                                                        {SPEED_OPTIONS.map((opt) => (
+                                                          <button
+                                                              key={opt.value}
+                                                              type="button"
+                                                              className={`yt-menu-item ${playbackSpeed === opt.value ? 'selected' : ''}`}
+                                                              onClick={() => handleSpeedChange(opt.value)}
+                                                          >
+                                                              <span>{opt.label}</span>
+                                                              {playbackSpeed === opt.value && <Check size={14} />}
+                                                          </button>
+                                                        ))}
                                                     </div>
-                                                    {SPEED_OPTIONS.map((opt) => (
-                                                        <button
-                                                            key={opt.value}
-                                                            type="button"
-                                                            className={`yt-menu-item ${playbackSpeed === opt.value ? 'selected' : ''}`}
-                                                            onClick={() => handleSpeedChange(opt.value)}
-                                                        >
-                                                            <span>{opt.label}</span>
-                                                            {playbackSpeed === opt.value && <Check size={14} />}
-                                                        </button>
-                                                    ))}
                                                 </div>
                                             )}
 
                                             {settingsSubmenu === 'quality' && (
                                                 <div className="yt-submenu">
-                                                    <div className="yt-submenu-header" onClick={() => setSettingsSubmenu(null)}>
-                                                        <ChevronRight size={15} style={{ transform: 'rotate(180deg)' }} />
+                                                    <button
+                                                        type="button"
+                                                        className="yt-submenu-header"
+                                                        onClick={() => setSettingsSubmenu(null)}
+                                                    >
+                                                        <ChevronRight size={15} />
                                                         <span>جودة الفيديو</span>
+                                                    </button>
+                                                    <div className="yt-submenu-list">
+                                                        {QUALITY_OPTIONS.map((opt) => (
+                                                          <button
+                                                              key={opt.value}
+                                                              type="button"
+                                                              className={`yt-menu-item ${selectedQuality === opt.value ? 'selected' : ''}`}
+                                                              onClick={() => handleQualityChange(opt.value)}
+                                                          >
+                                                              <span>{opt.label}</span>
+                                                              {selectedQuality === opt.value && <Check size={14} />}
+                                                          </button>
+                                                        ))}
                                                     </div>
-                                                    {QUALITY_OPTIONS.map((opt) => (
-                                                        <button
-                                                            key={opt.value}
-                                                            type="button"
-                                                            className={`yt-menu-item ${selectedQuality === opt.value ? 'selected' : ''}`}
-                                                            onClick={() => handleQualityChange(opt.value)}
-                                                        >
-                                                            <span>{opt.label}</span>
-                                                            {selectedQuality === opt.value && <Check size={14} />}
-                                                        </button>
-                                                    ))}
                                                 </div>
                                             )}
                                         </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MessageCircle, X, Send, Sparkles } from 'lucide-react';
 
 export const WhatsAppButton = ({
@@ -7,6 +7,22 @@ export const WhatsAppButton = ({
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [message, setMessage] = useState('');
+    const [isPulsing, setIsPulsing] = useState(false);
+
+    useEffect(() => {
+        const handleOpen = () => {
+            setIsOpen(true);
+            setIsPulsing(true);
+            const widget = document.getElementById('nawa-whatsapp-widget');
+            if (widget) {
+                widget.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
+            setTimeout(() => setIsPulsing(false), 2000);
+        };
+
+        window.addEventListener('open-whatsapp', handleOpen);
+        return () => window.removeEventListener('open-whatsapp', handleOpen);
+    }, []);
 
     const handleSend = (e) => {
         e?.preventDefault();
@@ -19,7 +35,7 @@ export const WhatsAppButton = ({
     };
 
     return (
-        <div className="whatsapp-widget" dir="rtl">
+        <div id="nawa-whatsapp-widget" className={`whatsapp-widget ${isPulsing ? 'pulse-highlight' : ''}`} dir="rtl">
             {/* Popover Card */}
             {isOpen && (
                 <div className="whatsapp-popover animate-in">
@@ -69,12 +85,6 @@ export const WhatsAppButton = ({
 
             {/* Trigger Floating Button */}
             <div className="whatsapp-trigger-wrap">
-                {!isOpen && (
-                    <div className="whatsapp-tooltip" onClick={() => setIsOpen(true)}>
-                        <span>تواصل معنا واتساب</span>
-                        <Sparkles size={12} />
-                    </div>
-                )}
                 <button
                     type="button"
                     className={`whatsapp-btn ${isOpen ? 'active' : ''}`}
