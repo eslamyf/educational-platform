@@ -1,5 +1,4 @@
-import { Route, Switch } from 'wouter';
-import CartPage from '@/features/cart/pages/CartPage';
+import { Route, Switch, Redirect } from 'wouter';
 import CheckoutPage from '@/features/checkout/pages/CheckoutPage';
 import CourseDetailPage from '@/features/catalog/pages/CourseDetailPage';
 import CoursesPage from '@/features/catalog/pages/CoursesPage';
@@ -22,7 +21,7 @@ export function AppRouter() {
             <Route path="/about-us" component={AboutPage} />
             <Route path="/courses" component={CoursesPage} />
             <Route path="/course/:id" component={CourseDetailPage} />
-            <Route path="/cart" component={CartPage} />
+            <Route path="/cart">{() => <Redirect to="/courses" />}</Route>
             <Route path="/checkout" component={CheckoutPage} />
             <Route path="/login" component={LoginPage} />
             <Route path="/welcome" component={WelcomePage} />

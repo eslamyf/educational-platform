@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { courses } from '@/lib/data';
 import { toast } from 'sonner';
 const MODULES_STORAGE_KEY = 'nawa-course-content';
 const COMPLETED_STORAGE_KEY = 'nawa-completed-lessons';
 const WATCHED_STORAGE_KEY = 'nawa-watched-lessons';
 const QUIZ_ANSWERS_STORAGE_KEY = 'nawa-quiz-answers';
+const ENROLLED_COURSES_STORAGE_KEY = 'nawa-enrolled-courses';
 export const defaultLearningModules = courses[0].modules.map((module, moduleIndex) => ({
     ...module,
     lessons: module.lessons.map((lesson, lessonIndex) => ({
@@ -21,6 +22,29 @@ export const defaultLearningModules = courses[0].modules.map((module, moduleInde
             : undefined,
     })),
 }));
+
+export const buildModulesForCourse = (course) => {
+    if (!course || !Array.isArray(course.modules)) return defaultLearningModules;
+    return course.modules.map((module, moduleIndex) => ({
+        ...module,
+        lessons: (module.lessons || []).map((lesson, lessonIndex) => ({
+            ...lesson,
+            files: lesson.files || (moduleIndex === 0 && lessonIndex === 0 ? [`ملخص ${course.shortTitle || course.title}.pdf`, `أوراق عمل واختبارات ${module.title}.pdf`] : []),
+            video: lesson.video || course.previewVideo || 'https://www.youtube.com/watch?v=_wmwmMeF3pE',
+            quiz: lesson.quiz || (lessonIndex === 1 ? {
+                question: `ما هو المفهوم الأساسي في درس "${lesson.title}"؟`,
+                options: [
+                    'فهم القواعد والمفاهيم التأسيسية وتطبيقها عمليًا',
+                    'حفظ الأسئلة المتوقعة دون استيعاب القوانين',
+                    'تخطي المحاضرات الأولى والبدء بالمسائل المعقدة',
+                    'الاعتماد على التخمين في الاختبارات',
+                ],
+                correct: 0,
+                explanation: 'الفهم المنهجي والتطبيق خطوة بخطوة يضمن استيعاب الدرس والتفوق في الامتحانات.',
+            } : undefined),
+        })),
+    }));
+};
 
 const sanitizeStoredModules = (mods) => {
     if (!Array.isArray(mods)) return defaultLearningModules;
@@ -121,6 +145,35 @@ export const LearningProvider = ({ children }) => {
             // ignore
         }
     }, [quizAnswers]);
+    const [enrolledCourses, setEnrolledCourses] = useState(() => {
+        try {
+            const saved = window.localStorage.getItem(ENROLLED_COURSES_STORAGE_KEY);
+            return saved ? JSON.parse(saved) : [];
+        } catch {
+            return [];
+        }
+    });
+
+    useEffect(() => {
+        try {
+            window.localStorage.setItem(ENROLLED_COURSES_STORAGE_KEY, JSON.stringify(enrolledCourses));
+        } catch {
+            // ignore
+        }
+    }, [enrolledCourses]);
+
+    const isCourseEnrolled = useCallback(
+        (courseId) => {
+            return enrolledCourses.includes(courseId);
+        },
+        [enrolledCourses]
+    );
+
+    const enrollInCourse = useCallback((courseId) => {
+        if (!courseId) return;
+        setEnrolledCourses((prev) => (prev.includes(courseId) ? prev : [...prev, courseId]));
+    }, []);
+
     const markVideoWatched = (lessonId) => {
         setWatchedLessons((prev) => prev.includes(lessonId) ? prev : [...prev, lessonId]);
     };
@@ -203,8 +256,22 @@ export const LearningProvider = ({ children }) => {
         setModules(defaultLearningModules);
         toast.info('تمت إعادة ضبط المنهج للوضع الافتراضي');
     };
+
+    const getCourseModules = useCallback((courseId) => {
+        if (!courseId || courseId === courses[0].id) {
+            return modules;
+        }
+        const targetCourse = courses.find((c) => c.id === courseId);
+        if (!targetCourse) return modules;
+        return buildModulesForCourse(targetCourse);
+    }, [modules]);
+
     const value = useMemo(() => ({
         modules,
+        getCourseModules,
+        enrolledCourses,
+        isCourseEnrolled,
+        enrollInCourse,
         completedLessons,
         watchedLessons,
         quizAnswers,
@@ -218,7 +285,7 @@ export const LearningProvider = ({ children }) => {
         addLesson,
         deleteLesson,
         resetModules,
-    }), [modules, completedLessons, watchedLessons, quizAnswers]);
+    }), [modules, getCourseModules, enrolledCourses, isCourseEnrolled, enrollInCourse, completedLessons, watchedLessons, quizAnswers]);
     return <LearningContext.Provider value={value}>{children}</LearningContext.Provider>;
 };
 export const useLearning = () => {

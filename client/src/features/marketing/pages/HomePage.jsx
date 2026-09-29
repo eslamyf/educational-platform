@@ -91,9 +91,9 @@ export const HomePage = () => {
             icon: CreditCard,
             title: 'اشتراك فوري وميسّر',
             short: 'طرق دفع متنوعة',
-            desc: 'ادفع بأمان عبر بطاقات بنكية، فودافون كاش، محفظة إلكترونية، أو فوري بكل سهولة.',
-            actionText: 'اذهب للسلة',
-            actionHref: '/cart',
+            desc: 'ادفع بأمان عبر بطاقات بنكية، فودافون كاش، محفظة إلكترونية، أو فوري بكل سهولة وبلا تعقيد.',
+            actionText: 'ابدأ الاشتراك الآن',
+            actionHref: '/courses',
         },
         {
             icon: PlayCircle,

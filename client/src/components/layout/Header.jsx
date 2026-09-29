@@ -122,9 +122,9 @@ export const Header = () => {
                                         {theme === 'dark' ? 'الوضع النهاري' : 'الوضع الليلي'}
                                     </span>
                                 </div>
-                                <span className="mobile-drawer-theme-badge">
-                                    {theme === 'dark' ? 'تفعيل النهاري ☀️' : 'تفعيل الليلي 🌙'}
-                                </span>
+                                <div className={`theme-switch-track ${theme === 'dark' ? 'dark-active' : ''}`} aria-hidden="true">
+                                    <div className="theme-switch-thumb" />
+                                </div>
                             </button>
 
                             {isAuthenticated ? (

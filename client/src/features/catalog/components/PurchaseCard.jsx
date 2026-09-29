@@ -1,11 +1,16 @@
 import React from 'react';
-import { Check, ShieldCheck, Zap, ArrowLeft, ShoppingBag } from 'lucide-react';
+import { useLocation } from 'wouter';
+import { Check, ShieldCheck, Zap, ArrowLeft, Play } from 'lucide-react';
 import { StarRating } from '@/components/common/StarRating';
 import { formatPrice, getDiscountLabel, purchaseIncludes, paidAccess, purchaseTip, purchaseGuarantee } from '@/lib/data';
-import { useCart } from '@/hooks/useCart';
-export const PurchaseCard = ({ course }) => {
-    const { addToCart, isCourseInCart } = useCart();
-    const alreadyInCart = isCourseInCart(course.id);
+
+export const PurchaseCard = ({ course, onOpenPreview }) => {
+    const [, setLocation] = useLocation();
+
+    const handleEnrollNow = () => {
+        setLocation(`/checkout?course=${course.id}`);
+    };
+
     return (<div className="purchase-card">
       <div className="purchase-card-top">
         <span className="discount-badge">{getDiscountLabel(course)}</span>
@@ -26,12 +31,17 @@ export const PurchaseCard = ({ course }) => {
         </li>
       </ul>
 
-      <button type="button" className={`btn btn-primary btn-wide ${alreadyInCart ? 'btn-in-cart' : ''}`} onClick={() => addToCart(course)}>
-        {alreadyInCart ? (<>
-            موجود في السلة <ShoppingBag size={16}/>
-          </>) : (<>
-            اشترك في المسار الآن <ArrowLeft size={16}/>
-          </>)}
+      <button type="button" className="btn btn-primary btn-wide" onClick={handleEnrollNow}>
+        اشترك في المسار الآن <ArrowLeft size={16}/>
+      </button>
+
+      <button
+        type="button"
+        className="purchase-preview-trigger"
+        onClick={() => setLocation(`/learn/${course.id}`)}
+      >
+        <Play size={14} fill="currentColor" />
+        <span>شاهد المحاضرة المجانية في مساحة التعلّم</span>
       </button>
 
       <div className="purchase-note">

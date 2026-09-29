@@ -31,6 +31,7 @@ export const courses = [
         ],
         requirements: ['مجلد المفاهيم أو كتاب الوزارة', 'دفتر لتدوين المخططات والرسومات'],
         audience: ['طلاب شعبة علمي علوم في الثانوية العامة', 'المقبلون على كليات الطب والعلوم والتمريض'],
+        previewVideo: 'https://www.youtube.com/watch?v=_wmwmMeF3pE',
         modules: [
             {
                 title: 'الدعامة والحركة والتنسيق الهرموني',
@@ -86,6 +87,7 @@ export const courses = [
         ],
         requirements: ['كتاب الفيزياء المدرسي', 'آلة حاسبة علمية'],
         audience: ['طلاب علمي علوم وعلمي رياضة في الثانوية العامة', 'المقبلون على كليات الهندسة والعلوم والحاسبات'],
+        previewVideo: 'https://www.youtube.com/watch?v=wHC245cVdHw',
         modules: [
             {
                 title: 'التيار الكهربي وقانون أوم وقوانين كيرشوف',
@@ -102,7 +104,7 @@ export const courses = [
                 count: 3,
                 duration: 'ساعتان و٤٠ دقيقة',
                 lessons: [
-                    { title: 'قانون فاراداي وقاعدة لنز والحث المتبادل', duration: '26:00', video: 'https://www.youtube.com/watch?v=wHC245cVdHw' },
+                    { title: 'قانون فاراداي وقاعدة لنز والحث المتبادل', duration: '26:00', free: true, video: 'https://www.youtube.com/watch?v=wHC245cVdHw' },
                     { title: 'المولد الكهربي (الدينامو) والمحول', duration: '32:00', video: 'https://www.youtube.com/watch?v=M7lc1UVf-VE' },
                     { title: 'ازدواجية الموجة والجسيم وظاهرة كومتون', duration: '35:00', video: 'https://www.youtube.com/watch?v=wHC245cVdHw' },
                 ],
@@ -139,6 +141,7 @@ export const courses = [
         ],
         requirements: ['أساسيات الجبر وحساب المثلثات', 'آلة حاسبة علمية'],
         audience: ['طلاب علمي رياضة في الثانوية العامة', 'المقبلون على كليات الهندسة والحاسبات والذكاء الاصطناعي'],
+        previewVideo: 'https://www.youtube.com/watch?v=wk-YlhE5c7Q',
         modules: [
             {
                 title: 'قواعد الاشتقاق وتطبيقات التفاضل',
@@ -191,6 +194,7 @@ export const courses = [
         ],
         requirements: ['جدول العناصر الدورية', 'دفتر لمعادلات الكيمياء'],
         audience: ['طلاب الثانوية العامة شعبة علمي علوم وعلمي رياضة', 'المقبلون على كليات الصيدلة والهندسة الكيميائية'],
+        previewVideo: 'https://www.youtube.com/watch?v=thXilnp5UNQ',
         modules: [
             {
                 title: 'العناصر الانتقالية والتحليل الكيميائي',
@@ -243,6 +247,7 @@ export const courses = [
         ],
         requirements: ['كتاب اللغة العربية', 'رغبة في التدريب المستمر'],
         audience: ['طلاب أولى ثانوي', 'من يريد بداية نموذجية في المرحلة الثانوية'],
+        previewVideo: 'https://www.youtube.com/watch?v=evbAyPgYkIk',
         modules: [
             {
                 title: 'البلاغة والنصوص المتحررة',
@@ -295,6 +300,7 @@ export const courses = [
         ],
         requirements: ['كتاب الجيولوجيا والبيئة للثانوية العامة'],
         audience: ['طلاب شعبة علمي علوم في الثانوية العامة'],
+        previewVideo: 'https://www.youtube.com/watch?v=evbAyPgYkIk',
         modules: [
             {
                 title: 'التراكيب الجيولوجية وحركات الأرض',
@@ -347,6 +353,7 @@ export const courses = [
         ],
         requirements: ['دفتر المفردات والقواعد'],
         audience: ['طلاب الصف الثاني الثانوي علمي وأدبي'],
+        previewVideo: 'https://www.youtube.com/watch?v=wHC245cVdHw',
         modules: [
             {
                 title: 'قواعد الأزمنة وبناء الجملة',
@@ -354,8 +361,17 @@ export const courses = [
                 duration: 'ساعتان',
                 lessons: [
                     { title: 'Tenses & Present/Past Structures', duration: '22:00', free: true, video: 'https://www.youtube.com/watch?v=wHC245cVdHw' },
-                    { title: 'Passive Voice & Modal Verbs', duration: '25:00', video: 'https://www.youtube.com/watch?v=M7lc1UVf-VE' },
+                    { title: 'Passive Voice & Modal Verbs', duration: '25:00', free: true, video: 'https://www.youtube.com/watch?v=M7lc1UVf-VE' },
                     { title: 'Reported Speech & Conditionals', duration: '28:00', video: 'https://www.youtube.com/watch?v=wHC245cVdHw' },
+                ],
+            },
+            {
+                title: 'مهارات الترجمة والقطع المتحررة',
+                count: 2,
+                duration: 'ساعتان و١٠ دقائق',
+                lessons: [
+                    { title: 'Reading Comprehension & Critical Thinking', duration: '24:00', free: true, video: 'https://www.youtube.com/watch?v=M7lc1UVf-VE' },
+                    { title: 'Translation Skills & Advanced Vocabulary', duration: '28:00', video: 'https://www.youtube.com/watch?v=wHC245cVdHw' },
                 ],
             },
         ],
@@ -390,6 +406,7 @@ export const courses = [
         ],
         requirements: ['الالتحاق بنظام البكالوريا المصرية'],
         audience: ['طلاب المرحلة الثانوية بنظام البكالوريا المصرية الراغبون في التخصص الطبي والحيوي'],
+        previewVideo: 'https://www.youtube.com/watch?v=_wmwmMeF3pE',
         modules: [
             {
                 title: 'مقدمة مسار العلوم الحيوية والطبية',
@@ -397,8 +414,17 @@ export const courses = [
                 duration: 'ساعتان و١٥ دقيقة',
                 lessons: [
                     { title: 'أهداف مسار الطب والعلوم الحيوية في البكالوريا المصرية', duration: '20:00', free: true, video: 'https://www.youtube.com/watch?v=_wmwmMeF3pE' },
-                    { title: 'الخلايا والجينات وتطبيقات الهندسة الحيوية', duration: '26:00', video: 'https://www.youtube.com/watch?v=0pA7qydUFbc' },
+                    { title: 'الخلايا والجينات وتطبيقات الهندسة الحيوية', duration: '26:00', free: true, video: 'https://www.youtube.com/watch?v=0pA7qydUFbc' },
                     { title: 'منهجية البحث العلمي والمشروع التطبيقي', duration: '30:00', video: 'https://www.youtube.com/watch?v=2I-nwLZSwAY' },
+                ],
+            },
+            {
+                title: 'دراسات الحالة والتشخيص الطبي التفاعلي',
+                count: 2,
+                duration: 'ساعتان و٣٠ دقيقة',
+                lessons: [
+                    { title: 'قراءة التحاليل الحيوية ودراسة وظائف الأعضاء', duration: '25:00', free: true, video: 'https://www.youtube.com/watch?v=_wmwmMeF3pE' },
+                    { title: 'إعداد المشروع البحثي التراكمي للبكالوريا', duration: '30:00', video: 'https://www.youtube.com/watch?v=0pA7qydUFbc' },
                 ],
             },
         ],
@@ -433,6 +459,7 @@ export const courses = [
         ],
         requirements: ['الالتحاق بنظام البكالوريا المصرية مسار الهندسة'],
         audience: ['طلاب البكالوريا المصرية المهتمون بالهندسة والذكاء الاصطناعي'],
+        previewVideo: 'https://www.youtube.com/watch?v=wk-YlhE5c7Q',
         modules: [
             {
                 title: 'مبادئ التفكير الهندسي والخوارزميات',
@@ -440,8 +467,17 @@ export const courses = [
                 duration: 'ساعتان',
                 lessons: [
                     { title: 'الخوارزميات وحل المشكلات الهندسية', duration: '20:00', free: true, video: 'https://www.youtube.com/watch?v=wk-YlhE5c7Q' },
-                    { title: 'مبادئ الأنظمة المدمجة والروبوتات', duration: '25:00', video: 'https://www.youtube.com/watch?v=M7lc1UVf-VE' },
+                    { title: 'مبادئ الأنظمة المدمجة والروبوتات', duration: '25:00', free: true, video: 'https://www.youtube.com/watch?v=M7lc1UVf-VE' },
                     { title: 'مشروع المسار الهندسي الفصلي', duration: '30:00', video: 'https://www.youtube.com/watch?v=wk-YlhE5c7Q' },
+                ],
+            },
+            {
+                title: 'البرمجة التطبيقية والأنظمة الذكية',
+                count: 2,
+                duration: 'ساعتان و٢٠ دقيقة',
+                lessons: [
+                    { title: 'أسس التفكير البرمجي وبناء النماذج الذكية', duration: '22:00', free: true, video: 'https://www.youtube.com/watch?v=wk-YlhE5c7Q' },
+                    { title: 'تصميم دائرة تحكم ذكية ومحاكاة البيانات', duration: '28:00', video: 'https://www.youtube.com/watch?v=M7lc1UVf-VE' },
                 ],
             },
         ],
@@ -476,6 +512,7 @@ export const courses = [
         ],
         requirements: ['الالتحاق بمسار إدارة الأعمال والاقتصاد بالبكالوريا المصرية'],
         audience: ['طلاب البكالوريا المصرية الراغبون في تخصصات التجارة وإدارة الأعمال والاقتصاد الدولي'],
+        previewVideo: 'https://www.youtube.com/watch?v=evbAyPgYkIk',
         modules: [
             {
                 title: 'أساسيات الاقتصاد ونموذج العمل التجاري',
@@ -483,8 +520,17 @@ export const courses = [
                 duration: 'ساعتان و١٠ دقائق',
                 lessons: [
                     { title: 'مقدمة الاقتصاد الكلي ومؤشرات النمو', duration: '22:00', free: true, video: 'https://www.youtube.com/watch?v=evbAyPgYkIk' },
-                    { title: 'بناء نموذج العمل التجاري ودراسة الجدوى', duration: '25:00', video: 'https://www.youtube.com/watch?v=2I-nwLZSwAY' },
+                    { title: 'بناء نموذج العمل التجاري ودراسة الجدوى', duration: '25:00', free: true, video: 'https://www.youtube.com/watch?v=2I-nwLZSwAY' },
                     { title: 'الإدارة المالية واستراتيجيات التسويق', duration: '28:00', video: 'https://www.youtube.com/watch?v=evbAyPgYkIk' },
+                ],
+            },
+            {
+                title: 'ريادة الأعمال والأسواق التنافسية',
+                count: 2,
+                duration: 'ساعتان و١٥ دقيقة',
+                lessons: [
+                    { title: 'دراسة السوق وتحليل المنافسين وسلوك المستهلك', duration: '24:00', free: true, video: 'https://www.youtube.com/watch?v=2I-nwLZSwAY' },
+                    { title: 'إعداد الخطة المالية للمشروع الفصلي', duration: '28:00', video: 'https://www.youtube.com/watch?v=evbAyPgYkIk' },
                 ],
             },
         ],
@@ -519,6 +565,7 @@ export const courses = [
         ],
         requirements: ['الالتحاق بمسار الآداب والعلوم الإنسانية بالبكالوريا المصرية'],
         audience: ['طلاب البكالوريا المصرية المتجهون لكليات الإعلام والألسن والآداب والعلوم السياسية والفنون'],
+        previewVideo: 'https://www.youtube.com/watch?v=wHC245cVdHw',
         modules: [
             {
                 title: 'مناهج الفكر الإنساني والبحث المقارن',
@@ -526,8 +573,17 @@ export const courses = [
                 duration: 'ساعتان',
                 lessons: [
                     { title: 'التفكير النقدي ونظريات المعرفة', duration: '20:00', free: true, video: 'https://www.youtube.com/watch?v=wHC245cVdHw' },
-                    { title: 'الأدب المقارن والترجمة الثقافية', duration: '24:00', video: 'https://www.youtube.com/watch?v=M7lc1UVf-VE' },
+                    { title: 'الأدب المقارن والترجمة الثقافية', duration: '24:00', free: true, video: 'https://www.youtube.com/watch?v=M7lc1UVf-VE' },
                     { title: 'منهجية إعداد البحث والمقال التحليلي', duration: '26:00', video: 'https://www.youtube.com/watch?v=wHC245cVdHw' },
+                ],
+            },
+            {
+                title: 'الفلسفة التطبيقية والمشروع التقييمي',
+                count: 2,
+                duration: 'ساعتان',
+                lessons: [
+                    { title: 'قراءة تحليلية في النصوص الفلسفية المعاصرة', duration: '22:00', free: true, video: 'https://www.youtube.com/watch?v=wHC245cVdHw' },
+                    { title: 'صياغة البحث الميداني ومشروع التخرج', duration: '26:00', video: 'https://www.youtube.com/watch?v=M7lc1UVf-VE' },
                 ],
             },
         ],
