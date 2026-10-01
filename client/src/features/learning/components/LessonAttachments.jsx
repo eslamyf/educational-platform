@@ -3,7 +3,21 @@ import { FileText, FileDown, FolderOpen } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const LessonAttachments = ({ files = [], lessonTitle = '' }) => {
-    const handleDownload = (filename) => {
+    const handleDownload = (fileItem) => {
+        const filename = typeof fileItem === 'string' ? fileItem : (fileItem.name || 'مرفق_المحاضرة.pdf');
+        const dataUrl = typeof fileItem === 'object' && fileItem.dataUrl ? fileItem.dataUrl : null;
+
+        if (dataUrl) {
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            toast.success(`تم بدء تحميل: ${filename}`);
+            return;
+        }
+
         try {
             const fileContent = `=====================================================
 منصة نَوَى التعليمية — المذكرات وأوراق العمل المرفقة
@@ -33,7 +47,7 @@ export const LessonAttachments = ({ files = [], lessonTitle = '' }) => {
             window.URL.revokeObjectURL(url);
 
             toast.success(`تم بدء تحميل: ${filename}`);
-        } catch (err) {
+        } catch {
             toast.success(`تم تحميل المرفق: ${filename}`);
         }
     };
@@ -49,26 +63,30 @@ export const LessonAttachments = ({ files = [], lessonTitle = '' }) => {
 
     return (
         <div className="file-list">
-            {files.map((file) => (
-                <div className="file-row" key={file}>
-                    <div className="file-info-group">
-                        <span className="file-icon">
-                            <FileText size={18} />
-                        </span>
-                        <div>
-                            <strong>{file}</strong>
-                            <small>مذكرة تدريب وملخص PDF</small>
+            {files.map((file, idx) => {
+                const fileName = typeof file === 'string' ? file : (file.name || 'ملف تدريبي.pdf');
+                const fileSize = typeof file === 'object' && file.size ? file.size : 'مذكرة تدريب وملخص PDF';
+                return (
+                    <div className="file-row" key={`${fileName}-${idx}`}>
+                        <div className="file-info-group">
+                            <span className="file-icon">
+                                <FileText size={18} />
+                            </span>
+                            <div>
+                                <strong>{fileName}</strong>
+                                <small>{fileSize}</small>
+                            </div>
                         </div>
+                        <button
+                            type="button"
+                            className="btn btn-outline btn-small"
+                            onClick={() => handleDownload(file)}
+                        >
+                            <FileDown size={14} /> تحميل الملف
+                        </button>
                     </div>
-                    <button
-                        type="button"
-                        className="btn btn-outline btn-small"
-                        onClick={() => handleDownload(file)}
-                    >
-                        <FileDown size={14} /> تحميل الملف
-                    </button>
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 };

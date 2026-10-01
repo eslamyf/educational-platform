@@ -130,7 +130,7 @@ export const LoginPage = () => {
     const [direction, setDirection] = useState('next');
     const [errors, setErrors] = useState({});
 
-    // 4-part name state
+    // 4-part name state for student
     const [nameParts, setNameParts] = useState({
         first: '',
         second: '',
@@ -151,7 +151,7 @@ export const LoginPage = () => {
     });
 
     const [password, setPassword] = useState('');
-    const totalSteps = 3;
+    const totalStudentSteps = 3;
 
     const currentStageKey = egyptEducationOptions.stages.includes(profile.stage)
         ? profile.stage
@@ -178,8 +178,8 @@ export const LoginPage = () => {
         if (key === 'email' && !/^\S+@\S+\.\S+$/.test(value)) {
             return 'اكتب بريدًا إلكترونيًا صحيحًا.';
         }
-        if (key === 'password' && value.length < 6) {
-            return 'كلمة المرور يجب أن تكون ٦ أحرف على الأقل.';
+        if (key === 'password' && value.length < 4) {
+            return 'كلمة المرور يجب أن تكون ٤ أحرف أو أرقام على الأقل.';
         }
         if (key === 'phone' && !/^01\d{9}$/.test(value.replace(/\s/g, ''))) {
             return 'رقم الهاتف يجب أن يتكون من ١١ رقمًا ويبدأ بـ01.';
@@ -242,7 +242,7 @@ export const LoginPage = () => {
     const nextStep = () => {
         if (!validateCurrentStep()) return;
         setDirection('next');
-        setStep((curr) => Math.min(totalSteps, curr + 1));
+        setStep((curr) => Math.min(totalStudentSteps, curr + 1));
     };
 
     const prevStep = () => {
@@ -255,15 +255,22 @@ export const LoginPage = () => {
         if (!validateCurrentStep()) return;
 
         if (mode === 'register') {
-            if (step < totalSteps) {
+            if (step < totalStudentSteps) {
                 nextStep();
                 return;
             }
+
             register(profile, 'student');
             navigate('/welcome');
         } else {
-            login(profile.email || 'student@nawa.education', 'student', profile.name);
-            navigate('/dashboard');
+            const logged = login(profile.email, password, 'student');
+            if (logged && logged.success) {
+                if (logged.role === 'instructor') {
+                    navigate('/instructor');
+                } else {
+                    navigate('/dashboard');
+                }
+            }
         }
     };
 
@@ -279,7 +286,7 @@ export const LoginPage = () => {
                         <em>يبدأ بخطوة.</em>
                     </h1>
                     <p>
-                        من مناهج الثانوية العامة إلى مسارات البكالوريا المصرية — شروحات تفصيلية، حل بنوك الأسئلة، ومتابعة دقيقة لكل خطوة في رحلتك.
+                        من مناهج الثانوية العامة إلى مسارات البكالوريا المصرية — شروحات تفصيلية، حل بنوك الأسئلة، ومتابعة دقيقة لكل خطوة في رحلتك نحو التفوق.
                     </p>
                     <div className="login-art-mark">
                         <BookOpen size={18} /> تعليم مصري راقٍ بطابع نَوَى
@@ -303,7 +310,7 @@ export const LoginPage = () => {
                 <div className="login-panel-top">
                     <Link href="/" className="login-back-home-btn" title="العودة للصفحة الرئيسية">
                         <ArrowRight size={17} />
-                        <span>العودة للصفحة الرئيسية</span>
+                        <span>العودة للرئيسية</span>
                     </Link>
 
                     <Link href="/" className="login-brand" title="نَوَى">
@@ -316,7 +323,9 @@ export const LoginPage = () => {
                 </div>
 
                 <div className={`login-form-wrap ${mode === 'register' ? 'register-form-wrap' : ''}`}>
-                    <div className="eyebrow">{mode === 'login' ? 'مرحبًا بك من جديد' : 'حساب طالب جديد'}</div>
+                    <div className="eyebrow">
+                        {mode === 'login' ? 'مرحبًا بك من جديد' : 'حساب طالب جديد'}
+                    </div>
                     <h2 className="display">{mode === 'login' ? 'خلّينا نكمّل.' : 'اعمل حسابك.'}</h2>
                     <p className="muted">
                         {mode === 'login'
@@ -346,16 +355,16 @@ export const LoginPage = () => {
                                 setErrors({});
                             }}
                         >
-                            <GraduationCap size={15} /> حساب جديد
+                            <GraduationCap size={15} /> حساب طالب جديد
                         </button>
                     </div>
 
-                    {/* Wizard Progress bar (Register mode) */}
+                    {/* Wizard Progress bar (Register mode - Student) */}
                     {mode === 'register' && (
                         <div className="wizard-progress">
                             <div className="wizard-progress-top">
                                 <span>
-                                    الخطوة {step} من {totalSteps}
+                                    الخطوة {step} من {totalStudentSteps}
                                 </span>
                                 <strong>
                                     {step === 1
@@ -366,10 +375,10 @@ export const LoginPage = () => {
                                 </strong>
                             </div>
                             <div className="wizard-progress-bar">
-                                <span style={{ width: `${(step / totalSteps) * 100}%` }} />
+                                <span style={{ width: `${(step / totalStudentSteps) * 100}%` }} />
                             </div>
                             <div className="wizard-steps">
-                                {Array.from({ length: totalSteps }).map((_, idx) => (
+                                {Array.from({ length: totalStudentSteps }).map((_, idx) => (
                                     <span className={step >= idx + 1 ? 'active' : ''} key={idx}>
                                         {idx + 1}
                                     </span>
@@ -390,7 +399,7 @@ export const LoginPage = () => {
                                         type="email"
                                         value={profile.email}
                                         onChange={(val) => updateProfileField('email', val)}
-                                        placeholderHelper="اكتب البريد المسجل به في المنصة"
+                                        placeholderHelper="اكتب البريد الإلكتروني المسجل به"
                                         error={errors.email}
                                     />
 
@@ -431,13 +440,13 @@ export const LoginPage = () => {
                                     </button>
                                 </div>
                             ) : (
-                                /* Register Multi-step Wizard with Floating Inputs */
+                                /* Student Multi-step Wizard */
                                 <>
                                     {step === 1 && (
                                         <div className="wizard-fields">
-                                            {/* 4-Part Floating Label Name Grid in Nawa Brand Identity */}
+                                            {/* 4-Part Name Grid */}
                                             <div className="form-group" style={{ gap: 8 }}>
-                                                <label className="form-label">الاسم رباعي (كما في البطاقة الرسمية)</label>
+                                                <label className="form-label">الاسم رباعي (كما في شهادة الميلاد / البطاقة)</label>
                                                 <div className="name-quad-grid">
                                                     <FloatingField
                                                         id="reg-first-name"
@@ -445,7 +454,7 @@ export const LoginPage = () => {
                                                         icon={UserRound}
                                                         value={nameParts.first}
                                                         onChange={(val) => handleNamePartChange('first', val)}
-                                                        placeholderHelper="اكتب اسمك بالعربي زي اللي موجود في البطاقة"
+                                                        placeholderHelper="اسمك الشخصي"
                                                         error={errors.firstName}
                                                     />
 
@@ -455,7 +464,7 @@ export const LoginPage = () => {
                                                         icon={UserRound}
                                                         value={nameParts.second}
                                                         onChange={(val) => handleNamePartChange('second', val)}
-                                                        placeholderHelper="اكتب اسمك بالعربي زي اللي موجود في البطاقة"
+                                                        placeholderHelper="اسم الوالد"
                                                         error={errors.secondName}
                                                     />
 
@@ -465,7 +474,7 @@ export const LoginPage = () => {
                                                         icon={UserRound}
                                                         value={nameParts.third}
                                                         onChange={(val) => handleNamePartChange('third', val)}
-                                                        placeholderHelper="اكتب اسمك بالعربي زي اللي موجود في البطاقة"
+                                                        placeholderHelper="اسم الجد"
                                                         error={errors.thirdName}
                                                     />
 
@@ -475,17 +484,17 @@ export const LoginPage = () => {
                                                         icon={UserRound}
                                                         value={nameParts.last}
                                                         onChange={(val) => handleNamePartChange('last', val)}
-                                                        placeholderHelper="اكتب اسمك بالعربي زي اللي موجود في البطاقة"
+                                                        placeholderHelper="اللقب / العائلة"
                                                         error={errors.lastName}
                                                     />
                                                 </div>
                                             </div>
 
-                                            {/* Phone & Governorate Grid with Floating Labels */}
+                                            {/* Phone & Governorate Grid */}
                                             <div className="form-grid compact-grid">
                                                 <FloatingField
                                                     id="reg-phone"
-                                                    label="رقم الهاتف"
+                                                    label="رقم هاتف الطالب"
                                                     icon={Phone}
                                                     type="tel"
                                                     value={profile.phone || ''}
@@ -506,7 +515,7 @@ export const LoginPage = () => {
                                                 />
                                             </div>
 
-                                            {/* Email with Floating Label */}
+                                            {/* Email */}
                                             <FloatingField
                                                 id="reg-email"
                                                 label="البريد الإلكتروني"
@@ -518,7 +527,7 @@ export const LoginPage = () => {
                                                 error={errors.email}
                                             />
 
-                                            {/* Password with Floating Label */}
+                                            {/* Password */}
                                             <FloatingField
                                                 id="reg-pass"
                                                 label="كلمة المرور"
@@ -532,7 +541,7 @@ export const LoginPage = () => {
                                                         password: validateField('password', val),
                                                     }));
                                                 }}
-                                                placeholderHelper="٦ أحرف أو أكثر لتأمين حسابك"
+                                                placeholderHelper="٤ أحرف أو أكثر لتأمين حسابك"
                                                 error={errors.password}
                                             />
                                         </div>
@@ -669,7 +678,7 @@ export const LoginPage = () => {
                                             </button>
                                         )}
 
-                                        {step < totalSteps ? (
+                                        {step < totalStudentSteps ? (
                                             <button type="button" className="btn btn-primary" onClick={nextStep}>
                                                 <span>التالي</span>
                                                 <ArrowLeft size={16} />

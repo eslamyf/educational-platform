@@ -32,9 +32,9 @@ export const LearnCoursePage = () => {
     const [, setLocation] = useLocation();
     const [, params] = useRoute('/learn/:id');
     const courseId = params?.id || 'secondary-biology';
-    const course = courses.find((item) => item.id === courseId) ?? courses[0];
 
     const {
+        getCourseById,
         getCourseModules,
         modules: defaultModules,
         quizAnswers,
@@ -43,8 +43,11 @@ export const LearnCoursePage = () => {
         isLessonCompleted,
         isVideoWatched,
         isCourseEnrolled,
+        saveLessonNote,
+        getLessonNote,
     } = useLearning();
 
+    const course = getCourseById(courseId);
     const isEnrolled = isCourseEnrolled ? isCourseEnrolled(course.id) : false;
     const modules = getCourseModules ? getCourseModules(course.id) : defaultModules;
 
@@ -258,6 +261,13 @@ export const LearnCoursePage = () => {
                         >
                             الملفات والاختبار {activeLesson?.quiz ? '· كويز متاح' : ''}
                         </button>
+                        <button
+                            type="button"
+                            className={activeTab === 'notes' ? 'active' : ''}
+                            onClick={() => setActiveTab('notes')}
+                        >
+                            ملاحظاتي الدراسية
+                        </button>
                     </div>
 
                     {/* Tab 1: Lesson Overview */}
@@ -303,6 +313,53 @@ export const LearnCoursePage = () => {
                                     />
                                 </div>
                             )}
+                        </section>
+                    )}
+
+                    {/* Tab 3: Student Study Notes */}
+                    {activeTab === 'notes' && (
+                        <section className="lesson-resources">
+                            <div className="portal-section-head">
+                                <div>
+                                    <div className="eyebrow">دفتر الملاحظات الرقمي</div>
+                                    <h2 className="section-title">ملاحظاتك الخاصة بهذه المحاضرة</h2>
+                                </div>
+                            </div>
+
+                            <div className="lesson-notes-editor">
+                                <p className="muted small">
+                                    تُحفظ ملاحظاتك تلقائيًا على هذا الجهاز لترجع إليها وقت المراجعة النهائية.
+                                </p>
+                                <textarea
+                                    rows={6}
+                                    defaultValue={getLessonNote(activeLessonId)}
+                                    key={activeLessonId}
+                                    onBlur={(e) => saveLessonNote(activeLessonId, e.target.value)}
+                                    placeholder="اكتب النقاط المهمة، القوانين، والملاحظات التي ركز عليها المعلم أثناء الشرح..."
+                                    style={{
+                                        width: '100%',
+                                        padding: '16px',
+                                        borderRadius: '16px',
+                                        border: '1px solid var(--line)',
+                                        background: 'var(--white)',
+                                        fontSize: '0.95rem',
+                                        fontFamily: 'inherit',
+                                        lineHeight: 1.7,
+                                        resize: 'vertical',
+                                    }}
+                                />
+                                <button
+                                    type="button"
+                                    className="btn btn-primary btn-small"
+                                    style={{ marginTop: 12 }}
+                                    onClick={(e) => {
+                                        const ta = e.currentTarget.previousElementSibling;
+                                        if (ta) saveLessonNote(activeLessonId, ta.value);
+                                    }}
+                                >
+                                    حفظ الملاحظة
+                                </button>
+                            </div>
                         </section>
                     )}
 

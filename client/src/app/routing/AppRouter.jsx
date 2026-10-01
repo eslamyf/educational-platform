@@ -3,6 +3,7 @@ import CheckoutPage from '@/features/checkout/pages/CheckoutPage';
 import CourseDetailPage from '@/features/catalog/pages/CourseDetailPage';
 import CoursesPage from '@/features/catalog/pages/CoursesPage';
 import LoginPage from '@/features/auth/pages/LoginPage';
+import AdminLoginPage from '@/features/auth/pages/AdminLoginPage';
 import WelcomePage from '@/features/auth/pages/WelcomePage';
 import AboutPage from '@/features/marketing/pages/AboutPage';
 import InstructorDashboardPage from '@/features/instructor-dashboard/pages/InstructorDashboardPage';
@@ -11,8 +12,11 @@ import HomePage from '@/features/marketing/pages/HomePage';
 import NotFound from '@/features/marketing/pages/NotFound';
 import ProfilePage from '@/features/profile/pages/ProfilePage';
 import StudentDashboardPage from '@/features/student-dashboard/pages/StudentDashboardPage';
+import { useAuth } from '@/hooks/useAuth';
 
 export function AppRouter() {
+    const { isAuthenticated, isInstructor } = useAuth();
+
     return (
         <Switch>
             <Route path="/" component={HomePage} />
@@ -24,6 +28,8 @@ export function AppRouter() {
             <Route path="/cart">{() => <Redirect to="/courses" />}</Route>
             <Route path="/checkout" component={CheckoutPage} />
             <Route path="/login" component={LoginPage} />
+            <Route path="/admin" component={isAuthenticated && isInstructor ? InstructorDashboardPage : AdminLoginPage} />
+            <Route path="/admin/login" component={AdminLoginPage} />
             <Route path="/welcome" component={WelcomePage} />
             <Route path="/profile" component={ProfilePage} />
             <Route path="/dashboard" component={StudentDashboardPage} />

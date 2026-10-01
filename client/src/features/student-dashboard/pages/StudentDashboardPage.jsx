@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'wouter';
 import {
     CirclePlay,
@@ -22,7 +22,7 @@ import {
 import { PortalLayout } from '@/components/layout/PortalLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { useLearning } from '@/hooks/useLearning';
-import { courses, egyptEducationOptions } from '@/lib/data';
+import { egyptEducationOptions } from '@/lib/data';
 import { toast } from 'sonner';
 
 export const StudentDashboardPage = () => {
@@ -37,7 +37,7 @@ export const StudentDashboardPage = () => {
 
     const [activeTab, setActiveTab] = useState(getTabFromUrl);
     const { user, updateProfile } = useAuth();
-    const { modules, completedLessons, quizAnswers } = useLearning();
+    const { allCourses, enrolledCourses, completedLessons } = useLearning();
 
     // Listen to location changes & popstate
     useEffect(() => {
@@ -55,12 +55,18 @@ export const StudentDashboardPage = () => {
         window.history.pushState({}, '', newUrl);
     };
 
-    // Enrolled courses
-    const enrolled = [courses[0], courses[1], courses[2], courses[3]];
+    // Enrolled courses resolved dynamically
+    const enrolled = useMemo(() => {
+        const list = (enrolledCourses || [])
+            .map((id) => (allCourses || []).find((c) => c.id === id))
+            .filter(Boolean);
+        return list.length > 0 ? list : [allCourses?.[0] || { id: 'secondary-biology', title: 'الأحياء — تالتة ثانوي', lessons: 36 }];
+    }, [enrolledCourses, allCourses]);
+
     const course = enrolled[0];
-    const lastLesson = modules[0]?.lessons[1] ?? modules[0]?.lessons[0] ?? { title: 'الدعامة في النبات والتركيب الخلوي', duration: '20:00' };
-    const totalCompleted = completedLessons.length || 6;
-    const progressPercent = Math.min(100, Math.round((totalCompleted / (course.lessons || 36)) * 100) || 75);
+    const lastLesson = course?.modules?.[0]?.lessons?.[1] ?? course?.modules?.[0]?.lessons?.[0] ?? { title: 'الدعامة في النبات والتركيب الخلوي', duration: '20:00' };
+    const totalCompleted = (completedLessons || []).length || 6;
+    const progressPercent = Math.min(100, Math.round((totalCompleted / (course?.lessons || 36)) * 100) || 75);
 
     // Profile form state for profile tab
     const [profileData, setProfileData] = useState({

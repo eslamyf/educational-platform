@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useRoute, useLocation, Link } from 'wouter';
 import {
     ChevronLeft,
@@ -12,6 +12,8 @@ import {
     CheckCircle2,
     ArrowLeft,
     Sparkles,
+    Star,
+    Send,
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -19,13 +21,13 @@ import { StarRating } from '@/components/common/StarRating';
 import { CurriculumList } from '@/features/catalog/components/CurriculumList';
 import { PurchaseCard } from '@/features/catalog/components/PurchaseCard';
 import { ReviewList } from '@/features/catalog/components/ReviewList';
+import { useLearning } from '@/hooks/useLearning';
+import { useAuth } from '@/hooks/useAuth';
 import {
-    getCourse,
     discount,
     getReviewLabel,
     studentCountLabel,
     ratingText,
-    instructorBio,
     instructorStats,
     reviewsLabel,
     reviewsDescription,
@@ -36,7 +38,16 @@ export const CourseDetailPage = () => {
     const [, params] = useRoute('/course/:id');
     const [, setLocation] = useLocation();
     const courseId = params?.id || 'secondary-biology';
-    const course = getCourse(courseId);
+    const { getCourseById, getCourseReviews, addCourseReview } = useLearning();
+    const { user } = useAuth();
+    const course = getCourseById(courseId);
+
+    // Interactive Review Form state
+    const [reviewText, setReviewText] = useState('');
+    const [reviewRating, setReviewRating] = useState(5);
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+    const reviews = getCourseReviews ? getCourseReviews(course.id) : (course.reviews || []);
 
     const handleBookmark = () => {
         toast.success('تم حفظ المسار في قائمتك المفضلة');
@@ -48,6 +59,26 @@ export const CourseDetailPage = () => {
 
     const handleOpenFreeLesson = () => {
         setLocation(`/learn/${course.id}`);
+    };
+
+    const handleReviewSubmit = (e) => {
+        e.preventDefault();
+        if (!reviewText.trim()) {
+            toast.error('يرجى كتابة نص التقييم');
+            return;
+        }
+
+        setIsSubmittingReview(true);
+        addCourseReview(course.id, {
+            name: user?.name || 'طالب نَوَى',
+            role: user?.grade ? `طالب — ${user.grade}` : 'طالب ثانوية عامة',
+            rating: reviewRating,
+            text: reviewText.trim(),
+            avatar: user?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
+        });
+
+        setReviewText('');
+        setIsSubmittingReview(false);
     };
 
     return (
@@ -63,7 +94,7 @@ export const CourseDetailPage = () => {
                             <ChevronLeft size={13} />
                             <Link href="/courses">الكورسات</Link>
                             <ChevronLeft size={13} />
-                            <span>{course.shortTitle}</span>
+                            <span>{course.shortTitle || course.title}</span>
                         </div>
 
                         <div className="detail-hero-grid">
@@ -73,7 +104,7 @@ export const CourseDetailPage = () => {
                                 <p className="detail-description">{course.description}</p>
 
                                 <div className="detail-tags">
-                                    {course.tags.map((tag) => (
+                                    {(course.tags || []).map((tag) => (
                                         <span className="tag" key={tag}>
                                             #{tag}
                                         </span>
@@ -82,14 +113,14 @@ export const CourseDetailPage = () => {
 
                                 <div className="detail-meta-line">
                                     <span>
-                                        <StarRating rating={course.rating} />{' '}
-                                        <b style={{ color: 'var(--ink)' }}>{ratingText}</b> ({getReviewLabel(course)})
+                                        <StarRating rating={course.rating || 5.0} />{' '}
+                                        <b style={{ color: 'var(--ink)' }}>{course.rating || 5.0}</b> ({getReviewLabel(course)})
                                     </span>
                                     <span>
-                                        <Users size={15} /> {studentCountLabel(course.students)}
+                                        <Users size={15} /> {studentCountLabel(course.students || 0)}
                                     </span>
                                     <span>
-                                        <Clock3 size={15} /> {course.duration}
+                                        <Clock3 size={15} /> {course.duration || '٤ ساعات'}
                                     </span>
                                 </div>
 
@@ -134,7 +165,7 @@ export const CourseDetailPage = () => {
                         <section className="detail-section">
                             <h2>ماذا ستخرج به من هذا المسار؟</h2>
                             <div className="outcomes-grid">
-                                {course.outcomes.map((item) => (
+                                {(course.outcomes || []).map((item) => (
                                     <div className="outcome" key={item}>
                                         <CheckCircle2 size={17} />
                                         <span>{item}</span>
@@ -145,17 +176,17 @@ export const CourseDetailPage = () => {
                             <div className="info-strip">
                                 <div className="info-item">
                                     <BookOpen size={19} />
-                                    <strong>{course.lessons.toLocaleString('ar-EG')} درس</strong>
+                                    <strong>{(course.lessons || 12).toLocaleString('ar-EG')} درس</strong>
                                     <span>محاضرات مرتبة</span>
                                 </div>
                                 <div className="info-item">
                                     <Clock3 size={19} />
-                                    <strong>{course.duration}</strong>
+                                    <strong>{course.duration || '٤ ساعات'}</strong>
                                     <span>إجمالي الوقت</span>
                                 </div>
                                 <div className="info-item">
                                     <GraduationCap size={19} />
-                                    <strong>{course.level}</strong>
+                                    <strong>{course.level || 'المرحلة الثانوية'}</strong>
                                     <span>مستوى المسار</span>
                                 </div>
                                 <div className="info-item">
@@ -171,17 +202,17 @@ export const CourseDetailPage = () => {
 
                         {/* Instructor Bio */}
                         <section className="detail-section">
-                            <h2>عن المدرّب</h2>
+                            <h2>عن المدرّب والمحاضر</h2>
                             <div className="instructor-card">
                                 <img
                                     className="instructor-photo"
-                                    src={course.instructorAvatar}
+                                    src={course.instructorAvatar || 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=200&q=85'}
                                     alt={course.instructor}
                                 />
                                 <div>
                                     <h3>{course.instructor}</h3>
                                     <div className="instructor-role">{course.instructorRole}</div>
-                                    <p className="instructor-bio">{instructorBio}</p>
+                                    <p className="instructor-bio">{course.instructorBio || 'خبير تدريس المناهج وإعداد بنوك أسئلة الامتحانات بنظام الفهم والتطبيق العملي.'}</p>
                                     <div className="instructor-stats">
                                         {instructorStats.map((stat) => (
                                             <div key={stat.label}>
@@ -194,16 +225,50 @@ export const CourseDetailPage = () => {
                             </div>
                         </section>
 
-                        {/* Student Reviews */}
+                        {/* Student Reviews & Add Review Form */}
                         <section className="detail-section">
                             <div className="section-head" style={{ marginBottom: 18 }}>
                                 <div>
                                     <h2 style={{ marginBottom: 5 }}>{reviewsLabel}</h2>
                                     <p className="muted small">{reviewsDescription}</p>
                                 </div>
-                                <StarRating rating={course.rating} />
+                                <StarRating rating={course.rating || 5.0} />
                             </div>
-                            <ReviewList reviews={course.reviews} rating={course.rating} />
+
+                            {/* Add Review Box */}
+                            <form onSubmit={handleReviewSubmit} className="add-review-box">
+                                <div className="review-box-header">
+                                    <Sparkles size={16} />
+                                    <span>أضف تجربتك ورأيك في هذا المسار:</span>
+                                </div>
+                                <div className="review-stars-selector">
+                                    <span>تقييمك:</span>
+                                    <div className="stars-buttons">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button
+                                                type="button"
+                                                key={star}
+                                                className={`star-select-btn ${reviewRating >= star ? 'selected' : ''}`}
+                                                onClick={() => setReviewRating(star)}
+                                            >
+                                                <Star size={18} fill={reviewRating >= star ? '#eab308' : 'none'} color="#eab308" />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <textarea
+                                    rows={2}
+                                    value={reviewText}
+                                    onChange={(e) => setReviewText(e.target.value)}
+                                    placeholder="اكتب تجربتك مع الشرح والتدريبات ومستوى الاستفادة..."
+                                    required
+                                />
+                                <button type="submit" className="btn btn-primary btn-small" disabled={isSubmittingReview}>
+                                    <Send size={13} /> إرسال التقييم
+                                </button>
+                            </form>
+
+                            <ReviewList reviews={reviews} rating={course.rating} />
                         </section>
                     </div>
 

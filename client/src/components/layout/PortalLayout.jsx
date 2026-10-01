@@ -3,20 +3,25 @@ import { Link } from 'wouter';
 import { PortalHeader } from './PortalHeader';
 import { PortalSidebar } from './PortalSidebar';
 import { useAuth } from '@/hooks/useAuth';
-import { LogIn, ArrowLeft } from 'lucide-react';
+import { LogIn, ArrowLeft, Shield } from 'lucide-react';
 
-export const PortalGate = () => {
+export const PortalGate = ({ role = 'student' }) => {
+    const isInstructor = role === 'instructor';
     return (
         <div className="portal-page access-gate-page">
             <div className="access-gate">
-                <div className="access-gate-icon">
-                    <LogIn size={26} />
+                <div className="access-gate-icon" style={{ background: isInstructor ? 'rgba(30, 41, 59, 0.08)' : undefined }}>
+                    {isInstructor ? <Shield size={26} color="#1e293b" /> : <LogIn size={26} />}
                 </div>
-                <div className="eyebrow">الدخول مطلوب</div>
-                <h1 className="display">سجّل حسابك عشان تكمّل.</h1>
-                <p>هذه المساحة خاصة بالطلاب المسجلين. سجّل الدخول أو أنشئ حسابًا مجانيًا للمتابعة.</p>
-                <Link href="/login" className="btn btn-primary">
-                    تسجيل الدخول <ArrowLeft size={15} />
+                <div className="eyebrow">{isInstructor ? 'بوابة إدارة المنصة والمعلمين' : 'الدخول مطلوب'}</div>
+                <h1 className="display">{isInstructor ? 'وصول محمي للمسؤولين.' : 'سجّل حسابك عشان تكمّل.'}</h1>
+                <p>
+                    {isInstructor
+                        ? 'هذه المساحة مخصصة للإدارة والمعلمين فقط. يرجى تسجيل الدخول بحسابك المصرح له عبر بوابة الإدارة.'
+                        : 'هذه المساحة خاصة بالطلاب المسجلين. سجّل الدخول أو أنشئ حسابًا مجانيًا للمتابعة.'}
+                </p>
+                <Link href={isInstructor ? '/admin' : '/login'} className="btn btn-primary">
+                    {isInstructor ? 'تسجيل دخول الإدارة والمعلم' : 'تسجيل الدخول'} <ArrowLeft size={15} />
                 </Link>
             </div>
         </div>
@@ -34,7 +39,7 @@ export const PortalLayout = ({
     const currentRole = propsRole || authRole;
 
     if (!isAuthenticated) {
-        return <PortalGate />;
+        return <PortalGate role={currentRole} />;
     }
 
     return (

@@ -8,6 +8,10 @@ import {
     Settings2,
     Sparkles,
     UserRound,
+    DollarSign,
+    Wallet,
+    GraduationCap,
+    Briefcase,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -24,16 +28,18 @@ export const PortalSidebar = ({ active, role: propsRole, onTabChange }) => {
 
     const instructorItems = [
         { icon: LayoutDashboard, label: 'نظرة عامة', href: '/instructor', key: 'overview' },
-        { icon: BookOpen, label: 'إدارة الكورسات والمحتوى', href: '/instructor?tab=courses', key: 'courses' },
-        { icon: Users, label: 'الطلاب والتقدم', href: '/instructor?tab=students', key: 'students' },
-        { icon: Settings2, label: 'إعدادات المنصة', href: '/instructor?tab=settings', key: 'settings' },
+        { icon: BookOpen, label: 'إدارة الكورسات والدروس', href: '/instructor?tab=courses', key: 'courses' },
+        { icon: Users, label: 'الطلاب والاشتراكات', href: '/instructor?tab=students', key: 'students' },
+        { icon: Briefcase, label: 'المعلمون والمحاضرون', href: '/instructor?tab=teachers', key: 'teachers' },
+        { icon: Wallet, label: 'المبيعات والأرباح', href: '/instructor?tab=earnings', key: 'earnings' },
+        { icon: Settings2, label: 'الملف الشخصي والإعدادات', href: '/instructor?tab=settings', key: 'settings' },
     ];
 
     const items = role === 'instructor' ? instructorItems : studentItems;
-    const avatarLetter = (user?.name || (role === 'instructor' ? 'م' : 'س'))[0];
+    const avatarLetter = (user?.name || (role === 'instructor' ? 'أ' : 'س'))[0];
 
     const handleItemClick = (e, item) => {
-        if (onTabChange && role === 'student' && item.key !== 'profile') {
+        if (onTabChange && item.key !== 'profile') {
             e.preventDefault();
             onTabChange(item.key);
         }
@@ -44,10 +50,10 @@ export const PortalSidebar = ({ active, role: propsRole, onTabChange }) => {
             <div className="sidebar-profile">
                 <div className="sidebar-avatar">{avatarLetter}</div>
                 <div className="sidebar-profile-info">
-                    <strong>{user?.name || (role === 'instructor' ? 'صاحب المنصة' : 'سارة أحمد')}</strong>
+                    <strong>{user?.name || (role === 'instructor' ? 'إدارة المنصة والمعلم' : 'سارة أحمد')}</strong>
                     <span>
                         {role === 'instructor'
-                            ? 'إدارة المنصة'
+                            ? (user?.track ? `معلّم ${user.track}` : 'إدارة المنصة والمعلم')
                             : `${user?.stage || 'المرحلة الثانوية'} · ${user?.grade || 'الصف الثالث الثانوي'}`}
                     </span>
                 </div>
@@ -76,7 +82,7 @@ export const PortalSidebar = ({ active, role: propsRole, onTabChange }) => {
                 <strong>{role === 'instructor' ? 'أنت تصنع تجربة تعليمية متكاملة' : 'خطوة صغيرة اليوم، أثر كبير'}</strong>
                 <p>
                     {role === 'instructor'
-                        ? 'أي تعديل أو إضافة درس يظهر مباشرة لجميع طلاب المنصة.'
+                        ? 'أي تعديل أو إضافة كورس أو فيديو يظهر فورًا لجميع طلاب المنصة.'
                         : 'استمر في درس واحد يوميًا للحفاظ على وتيرة التعلّم.'}
                 </p>
             </div>

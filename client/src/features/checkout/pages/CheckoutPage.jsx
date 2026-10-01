@@ -24,7 +24,7 @@ import { toast } from 'sonner';
 export const CheckoutPage = () => {
     const [, setLocation] = useLocation();
     const { user } = useAuth();
-    const { enrollInCourse } = useLearning();
+    const { enrollInCourse, getCourseById } = useLearning();
 
     // Get course from URL search params or fallback
     const courseIdFromUrl = useMemo(() => {
@@ -34,13 +34,13 @@ export const CheckoutPage = () => {
     }, []);
 
     const course = useMemo(() => {
-        return courses.find((c) => c.id === courseIdFromUrl) || courses[0];
-    }, [courseIdFromUrl]);
+        return getCourseById(courseIdFromUrl);
+    }, [getCourseById, courseIdFromUrl]);
 
     const [formData, setFormData] = useState({
-        name: user?.name || 'سارة أحمد',
-        email: user?.email || 'sara@example.com',
-        phone: user?.phone || '01012345678',
+        name: user?.name || '',
+        email: user?.email || '',
+        phone: user?.phone || '',
         paymentMethod: 'card',
         note: '',
     });
@@ -88,9 +88,21 @@ export const CheckoutPage = () => {
             return;
         }
 
-        enrollInCourse(course.id);
+        const methodName =
+            formData.paymentMethod === 'vodafone'
+                ? 'فودافون كاش ومحافظ إلكترونية'
+                : formData.paymentMethod === 'fawry'
+                    ? 'فوري باي (Fawry)'
+                    : 'بطاقة بنكية (ميزة / فيزا)';
+
+        enrollInCourse(course.id, {
+            name: formData.name.trim(),
+            email: formData.email.trim(),
+            amount: finalPrice,
+            paymentMethod: methodName,
+        });
         setIsCompleted(true);
-        toast.success(`تم تأكيد اشتراكك في مسار ${course.shortTitle} بنجاح!`);
+        toast.success(`تم تأكيد اشتراكك في مسار ${course.shortTitle || course.title} بنجاح!`);
     };
 
     if (isCompleted) {

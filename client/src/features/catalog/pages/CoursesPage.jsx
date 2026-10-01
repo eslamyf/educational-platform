@@ -4,7 +4,8 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { CourseCard } from '@/features/catalog/components/CourseCard';
 import { EmptyState } from '@/components/common/EmptyState';
-import { courses, categories } from '@/lib/data';
+import { useLearning } from '@/hooks/useLearning';
+import { categories } from '@/lib/data';
 
 const TRACK_FILTER_MAP = {
     'كل المناهج والمسارات': {
@@ -93,6 +94,7 @@ const TRACK_FILTER_MAP = {
 };
 
 export const CoursesPage = () => {
+    const { allCourses } = useLearning();
     const [category, setCategory] = useState(categories[0]);
 
     // Derived available grades & subjects for current track
@@ -114,7 +116,7 @@ export const CoursesPage = () => {
     };
 
     const filteredCourses = useMemo(() => {
-        const result = courses.filter((course) => {
+        const result = (allCourses || []).filter((course) => {
             // Track match
             let matchCategory = true;
             if (category === 'الثانوية العامة (علمي علوم)') {
